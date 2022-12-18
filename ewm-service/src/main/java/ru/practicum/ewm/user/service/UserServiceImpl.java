@@ -10,8 +10,10 @@ import ru.practicum.ewm.user.dao.UserRepository;
 import ru.practicum.ewm.user.dto.UserDto;
 import ru.practicum.ewm.user.mapper.UserMapper;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 
@@ -25,7 +27,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto getUserById(long id) {
         try {
-            log.info("Getting user with id {}", id);
+            log.info("Getting user with id={}", id);
             return userMapper.toUserDto(userRepository.findById(id).get());
         } catch (NoSuchElementException e) {
             throw new NoSuchElementException(String.format("User with id %s is not found", id));
@@ -35,14 +37,14 @@ public class UserServiceImpl implements UserService {
     //TODO: проверить этот метод на корректность работы
     @Override
     @Transactional(readOnly = true)
-    public List<UserDto> getUsersByIds(List<Long> ids, Pageable pageable) {
+    public List<UserDto> getUsersByIds(Set<Long> ids, Pageable pageable) {
         try {
             log.info("Getting users list with such ids: {}", ids);
             return userRepository.findUsersByIdIn(ids, pageable).stream()
                     .map(userMapper::toUserDto)
                     .collect(Collectors.toList());
         } catch (NoSuchElementException e) {
-            throw new NoSuchElementException(String.format("Some users from collection %s is not found", ids));
+            return new ArrayList<>();
         }
     }
 

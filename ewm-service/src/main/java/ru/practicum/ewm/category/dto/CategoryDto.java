@@ -1,4 +1,4 @@
-package ru.practicum.ewm.user.dto;
+package ru.practicum.ewm.category.dto;
 
 import lombok.*;
 
@@ -10,8 +10,7 @@ import javax.validation.constraints.Size;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserShortDto {
-    //TODO: возможно и не нужен он
+public class CategoryDto {
     private long id;
     @NotBlank(message = "Name is mandatory")
     @Size(max = 50, message = "Name is to long")

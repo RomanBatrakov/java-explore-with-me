@@ -13,6 +13,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Validated
@@ -21,9 +22,9 @@ import java.util.List;
 @AllArgsConstructor
 public class UserController {
     private final UserService userService;
-
+//TODO: роверить метод, что корректно список выдает в дефолте
     @GetMapping
-    public ResponseEntity<List<UserDto>> getUsersByIds(@RequestParam List<Long> ids,
+    public ResponseEntity<List<UserDto>> getUsersByIds(@RequestParam(required = false) Set<Long> ids,
                                                        @RequestParam(required = false, defaultValue = "0")
                                                        @PositiveOrZero int from,
                                                        @RequestParam(required = false, defaultValue = "10")
@@ -40,7 +41,7 @@ public class UserController {
 
     @DeleteMapping("/{userId}")
     public void deleteUser(@PathVariable("userId") Long id) {
-        log.info("DELETE request for path /admin/users with userId={}", id);
+        log.info("DELETE request for path /admin/users/{userId} with userId={}", id);
         userService.deleteUser(id);
     }
 }
