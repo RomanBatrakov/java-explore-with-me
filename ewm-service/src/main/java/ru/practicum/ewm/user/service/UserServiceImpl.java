@@ -34,7 +34,7 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    //TODO: проверить этот метод на корректность работы
+    //TODO: проверить этот метод на корректность работы при отсутствии списка id
     @Override
     @Transactional(readOnly = true)
     public List<UserDto> getUsersByIds(Set<Long> ids, Pageable pageable) {
@@ -50,14 +50,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto createUser(UserDto userDto) {
-        log.info("Creating user {}", userDto);
+        log.info("Creating user: {}", userDto);
         return userMapper.toUserDto(userRepository.save(userMapper.toUser(userDto)));
     }
 
     @Override
     public void deleteUser(long id) {
         try {
-            log.info("Deleting user with id {}", id);
+            log.info("Deleting user with id={}", id);
             userRepository.deleteById(id);
         } catch (EmptyResultDataAccessException e) {
             throw new NoSuchElementException(String.format("User with id %s is not found", id));
