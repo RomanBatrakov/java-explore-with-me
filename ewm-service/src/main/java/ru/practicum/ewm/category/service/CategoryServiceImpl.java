@@ -42,6 +42,7 @@ public class CategoryServiceImpl implements CategoryService {
     //TODO: проверить на то, какая ошибка должна выпасть
     @Override
     public CategoryDto updateCategory(CategoryDto categoryDto) {
+        getCategoryById(categoryDto.getId());
         try {
             log.info("Updating category: {}", categoryDto);
             return categoryMapper.toCategoryDto(categoryRepository.save(categoryMapper.toCategory(categoryDto)));

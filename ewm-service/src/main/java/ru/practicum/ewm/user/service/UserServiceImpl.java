@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm.user.dao.UserRepository;
 import ru.practicum.ewm.user.dto.UserDto;
 import ru.practicum.ewm.user.mapper.UserMapper;
@@ -36,7 +35,6 @@ public class UserServiceImpl implements UserService {
 
     //TODO: проверить этот метод на корректность работы при отсутствии списка id
     @Override
-    @Transactional(readOnly = true)
     public List<UserDto> getUsersByIds(Set<Long> ids, Pageable pageable) {
         try {
             log.info("Getting users list with such ids: {}", ids);
