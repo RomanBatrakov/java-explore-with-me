@@ -15,10 +15,10 @@ public class LocationDto {
     @NotNull(message = "lat is null")
     @Min(value = -90, message = "lat cant be less than -90")
     @Max(value = 90, message = "lat cant be more than 90")
-    private Double lat;
+    private Float lat;
     @NotBlank(message = "lon is mandatory")
     @NotNull(message = "lon is null")
     @Min(value = -180, message = "lat cant be less than -180")
     @Max(value = 180, message = "lat cant be more than 180")
-    private Double lon;
+    private Float lon;
 }

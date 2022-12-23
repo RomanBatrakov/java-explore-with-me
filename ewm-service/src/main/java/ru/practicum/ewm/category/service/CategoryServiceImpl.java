@@ -11,12 +11,14 @@ import ru.practicum.ewm.category.mapper.CategoryMapper;
 import ru.practicum.ewm.user.dao.UserRepository;
 import ru.practicum.ewm.user.mapper.UserMapper;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@Transactional
 @AllArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;

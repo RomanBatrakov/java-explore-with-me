@@ -9,6 +9,7 @@ import ru.practicum.ewm.user.dao.UserRepository;
 import ru.practicum.ewm.user.dto.UserDto;
 import ru.practicum.ewm.user.mapper.UserMapper;
 
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@Transactional
 @AllArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
