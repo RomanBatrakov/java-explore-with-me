@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 public class Request {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
     @JoinColumn(name = "requester_id", referencedColumnName = "id")
     @ManyToOne
     private User requester;

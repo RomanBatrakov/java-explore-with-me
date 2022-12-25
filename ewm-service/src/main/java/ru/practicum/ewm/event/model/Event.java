@@ -2,11 +2,13 @@ package ru.practicum.ewm.event.model;
 
 import lombok.*;
 import ru.practicum.ewm.category.model.Category;
+import ru.practicum.ewm.compilation.model.Compilation;
 import ru.practicum.ewm.location.model.Location;
 import ru.practicum.ewm.user.model.User;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -18,7 +20,7 @@ import java.time.LocalDateTime;
 public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
     @Column(name = "annotation")
     private String annotation;
     @ManyToOne
@@ -47,9 +49,11 @@ public class Event {
     @Column(name = "request_moderation")
     private Boolean requestModeration;
     @Column(name = "state")
-    private String state;
+    private State state;
     @Column(name = "title")
     private String title;
     @Column(name = "views")
     private Long views;
+//    @ManyToMany(mappedBy = "events")
+//    private List<Compilation> compilations;
 }

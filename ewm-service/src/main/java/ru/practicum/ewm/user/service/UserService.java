@@ -7,11 +7,11 @@ import java.util.List;
 import java.util.Set;
 
 public interface UserService {
-    UserDto getUserById(long id);
+    UserDto getUserById(Long id);
 
     List<UserDto> getUsersByIds(Set<Long> ids, Pageable pageable);
 
     UserDto createUser(UserDto userDto);
 
-    void deleteUser(long id);
+    void deleteUser(Long id);
 }

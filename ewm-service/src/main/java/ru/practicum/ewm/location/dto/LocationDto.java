@@ -10,7 +10,7 @@ import javax.validation.constraints.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class LocationDto {
-    private long id;
+    private Long id;
     @NotBlank(message = "lat is mandatory")
     @NotNull(message = "lat is null")
     @Min(value = -90, message = "lat cant be less than -90")

@@ -12,7 +12,7 @@ import javax.validation.constraints.Size;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CategoryDto {
-    private long id;
+    private Long id;
     @NotNull(message = "Name is null")
     @NotBlank(message = "Name is mandatory")
     @Size(max = 50, message = "Name is to long")

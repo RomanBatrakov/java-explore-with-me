@@ -2,11 +2,13 @@ package ru.practicum.ewm.event.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
+import org.hibernate.validator.constraints.ScriptAssert;
 import ru.practicum.ewm.category.dto.CategoryDto;
 import ru.practicum.ewm.event.model.State;
 import ru.practicum.ewm.location.dto.LocationDto;
 import ru.practicum.ewm.user.dto.UserShortDto;
 
+import javax.validation.constraints.*;
 import java.time.LocalDateTime;
 
 @Getter
@@ -14,24 +16,27 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class EventDto {
-    private Long id;
+@ScriptAssert(lang = "javascript", script = "_this.eventDate.before(LocalDateTime.now().plusHours(2))")
+public class UpdateEventDto {
+    @NotNull
+    @Size(min=20, max=2000)
     private String annotation;
+    @NotNull
     private CategoryDto category;
-    private Long confirmedRequests;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime createdOn;
+    @NotNull
+    @Size(min=20, max=7000)
     private String description;
+    @NotNull
+    @Future
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime eventDate;
-    private UserShortDto initiator;
-    private LocationDto location;
+    @NotNull
+    private Long id;
+    @NotNull
     private Boolean paid;
+    @NotNull
     private Long participantLimit;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime publishedOn;
-    private Boolean requestModeration;
-    private State state;
+    @NotNull
+    @Size(min=3, max=120)
     private String title;
-    private Long views;
 }

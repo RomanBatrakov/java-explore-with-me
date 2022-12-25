@@ -13,7 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class NewCompilationDto {
-    private long id;
+    private Long id;
     @NotNull(message = "Title is null")
     @NotBlank(message = "Title is mandatory")
     @Size(max = 255, message = "Title is to long")

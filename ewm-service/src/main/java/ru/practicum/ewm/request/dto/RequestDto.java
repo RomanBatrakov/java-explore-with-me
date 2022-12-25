@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RequestDto {
-    private long id;
+    private Long id;
     private UserDto requester;
     private EventDto event;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")

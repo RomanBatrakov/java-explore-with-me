@@ -11,6 +11,8 @@ import ru.practicum.ewm.compilation.dto.CompilationDto;
 import ru.practicum.ewm.compilation.dto.NewCompilationDto;
 import ru.practicum.ewm.compilation.mapper.CompilationMapper;
 import ru.practicum.ewm.compilation.model.Compilation;
+import ru.practicum.ewm.event.service.EventService;
+import ru.practicum.ewm.event.model.Event;
 
 import javax.transaction.Transactional;
 import java.util.List;
@@ -25,6 +27,7 @@ public class CompilationServiceImpl implements CompilationService {
     private final CompilationRepository compilationRepository;
     private final EventsCompilationRepository eventsCompilationRepository;
     private final CompilationMapper compilationMapper;
+    private final EventService eventService;
 
     //    TODO: добавить добавление событий в подборки
     @Override
@@ -51,8 +54,10 @@ public class CompilationServiceImpl implements CompilationService {
     @Override
     public CompilationDto createCompilation(NewCompilationDto newCompilationDto) {
         log.info("Creating compilation: {}", newCompilationDto);
-        return compilationMapper.toCompilationDto(
-                compilationRepository.save(compilationMapper.toCompilation(newCompilationDto)));
+        Compilation compilation = compilationMapper.toCompilation(newCompilationDto);
+        List<Event> events = eventService.eventsIdsToEvents(newCompilationDto.getEvents());
+        compilation.setEvents(events);
+        return compilationMapper.toCompilationDto(compilationRepository.save(compilation));
     }
 
     @Override

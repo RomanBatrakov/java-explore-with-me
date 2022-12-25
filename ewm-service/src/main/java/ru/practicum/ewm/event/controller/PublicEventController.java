@@ -25,7 +25,7 @@ import java.util.List;
 public class PublicEventController {
     private final String SORT_VALIDATION = "^VIEWS$|^EVENT_DATE$";
     private final EventService eventService;
-//TODO: соблюсти условия
+
     @GetMapping
     public ResponseEntity<List<EventShortDto>> getAllPublicEvents(
             @RequestParam(required = false) String text,
@@ -43,7 +43,7 @@ public class PublicEventController {
         return ResponseEntity.ok(eventService.getAllPublicEvents(text, categories, paid, rangeStart, rangeEnd,
                 onlyAvailable, sort, PageRequest.of(from, size), request));
     }
-//TODO: соблюсти условия
+
     @GetMapping("/{id}")
     public ResponseEntity<EventDto> getPublicEventById(@PathVariable("id") Long id, HttpServletRequest request) {
         log.info("GET request for path /events/{id} with id={}", id);

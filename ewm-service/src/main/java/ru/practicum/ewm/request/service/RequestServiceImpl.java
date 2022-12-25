@@ -58,7 +58,8 @@ public class RequestServiceImpl implements RequestService {
         Event event = eventMapper.toEvent(eventService.getEventById(eventId));
         if (Objects.equals(event.getInitiator().getId(), userId)
                 && event.getPublishedOn() == null
-                && event.getParticipantLimit() <= event.getConfirmedRequests())
+                && (event.getParticipantLimit() != 0
+                && event.getParticipantLimit() <= event.getConfirmedRequests()))
             throw new ValidationException(String.format("Requester with id %s cant be initiator", userId));
         Request request = Request.builder()
                 .requester(user)

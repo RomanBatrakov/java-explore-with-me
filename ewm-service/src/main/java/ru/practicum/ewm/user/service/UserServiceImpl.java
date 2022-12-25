@@ -26,7 +26,7 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
 
     @Override
-    public UserDto getUserById(long id) {
+    public UserDto getUserById(Long id) {
         try {
             log.info("Getting user with id={}", id);
             return userMapper.toUserDto(userRepository.findById(id).get());
@@ -55,7 +55,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void deleteUser(long id) {
+    public void deleteUser(Long id) {
         try {
             log.info("Deleting user with id={}", id);
             userRepository.deleteById(id);
