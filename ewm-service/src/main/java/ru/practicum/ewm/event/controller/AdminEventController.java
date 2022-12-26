@@ -21,6 +21,7 @@ import java.util.List;
 @RequestMapping(path = "/admin/events")
 @AllArgsConstructor
 public class AdminEventController {
+    private static final String EVENT_ID_PATH_VARIABLE_KEY = "eventId";
     private final EventService eventService;
 
     @GetMapping
@@ -39,19 +40,19 @@ public class AdminEventController {
     }
 
     @PutMapping("/{eventId}")
-    public ResponseEntity<EventDto> updateEventByAdmin(@PathVariable("eventId") Long id,
+    public ResponseEntity<EventDto> updateEventByAdmin(@PathVariable(EVENT_ID_PATH_VARIABLE_KEY) Long id,
                                                        @RequestBody EventDto eventDto) {
         log.info("PUT request for path /admin/events/{eventId} with eventId={}", id);
         return ResponseEntity.ok(eventService.updateEventByAdmin(id, eventDto));
     }
 
     @PatchMapping("/{eventId}/publish")
-    public ResponseEntity<EventDto> publishEvent(@PathVariable("eventId") Long id) {
+    public ResponseEntity<EventDto> publishEvent(@PathVariable(EVENT_ID_PATH_VARIABLE_KEY) Long id) {
         log.info("PATCH request for path /admin/events/{eventId}/publish with eventId={}", id);
         return ResponseEntity.ok(eventService.publishEvent(id));
     }
     @PatchMapping("/{eventId}/reject")
-    public ResponseEntity<EventDto> rejectEvent(@PathVariable("eventId") Long id) {
+    public ResponseEntity<EventDto> rejectEvent(@PathVariable(EVENT_ID_PATH_VARIABLE_KEY) Long id) {
         log.info("PATCH request for path /admin/events/{eventId}/reject with eventId={}", id);
         return ResponseEntity.ok(eventService.rejectEvent(id));
     }

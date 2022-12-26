@@ -10,4 +10,10 @@ public interface RequestService {
     RequestDto createRequest(Long userId, Long eventId);
 
     RequestDto cancelRequest(Long userId, Long requestId);
+
+    List<RequestDto> getUserRequests(Long id, Long eventId);
+
+    RequestDto confirmRequest(Long id, Long eventId, Long requestId);
+
+    RequestDto rejectRequest(Long id, Long eventId, Long requestId);
 }
