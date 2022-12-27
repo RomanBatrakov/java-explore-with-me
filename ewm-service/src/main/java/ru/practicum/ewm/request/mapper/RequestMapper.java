@@ -6,8 +6,8 @@ import ru.practicum.ewm.request.model.Request;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = "spring")
 public interface RequestMapper {
-    Request toRequest(RequestDto requestDto);
-
+    @Mapping(target = "requester", source = "requester.id")
+    @Mapping(target = "event", source = "event.id")
     RequestDto toRequestDto(Request request);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)

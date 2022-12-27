@@ -1,10 +1,7 @@
 package ru.practicum.ewm.event.service;
 
-import org.springframework.data.domain.PageRequest;
-import ru.practicum.ewm.event.dto.EventDto;
-import ru.practicum.ewm.event.dto.EventShortDto;
-import ru.practicum.ewm.event.dto.NewEventDto;
-import ru.practicum.ewm.event.dto.UpdateEventDto;
+import org.springframework.data.domain.Pageable;
+import ru.practicum.ewm.event.dto.*;
 import ru.practicum.ewm.event.model.Event;
 import ru.practicum.ewm.event.model.State;
 
@@ -15,30 +12,34 @@ import java.util.List;
 public interface EventService {
     List<EventShortDto> getAllPublicEvents(String text, Long[] categories, Boolean paid, LocalDateTime rangeStart,
                                            LocalDateTime rangeEnd, Boolean onlyAvailable, String sort,
-                                           PageRequest pageRequest, HttpServletRequest request);
+                                           Pageable pageable, HttpServletRequest request);
 
-    EventDto getPublicEventById(Long id, HttpServletRequest request);
+    EventDto getPublicEventById(Long eventId, HttpServletRequest request);
 
     EventDto getEventById(Long eventId);
 
     List<Event> eventsIdsToEvents(List<Long> events);
 
     List<EventDto> getAllEventsByFilter(List<Long> users, List<State> states, List<Long> categories, LocalDateTime rangeStart,
-                                LocalDateTime rangeEnd, PageRequest of);
+                                LocalDateTime rangeEnd, Pageable pageable);
 
-    EventDto updateEventByAdmin(Long id, EventDto eventDto);
+    EventDto updateEventByAdmin(Long id, AdminUpdateEventDto eventDto);
 
-    EventDto publishEvent(Long id);
+    EventDto publishEvent(Long eventId);
 
-    EventDto rejectEvent(Long id);
+    EventDto rejectEvent(Long eventId);
 
-    List<EventShortDto> getEventsByUser(Long id, PageRequest of);
+    List<EventShortDto> getEventsByUser(Long userId, Pageable pageable);
 
-    EventDto updateEventByUser(Long id, UpdateEventDto updateEventDto);
+    EventDto updateEventByUser(Long userId, UpdateEventDto updateEventDto);
 
-    EventDto createEventByUser(NewEventDto newEventDto, Long id);
+    EventDto createEventByUser(NewEventDto newEventDto, Long userId);
 
-    EventDto getUserEvent(Long id, Long eventId);
+    EventDto getUserEvent(Long userId, Long eventId);
 
-    EventDto cancelEventByUser(Long id, Long eventId);
+    EventDto cancelEventByUser(Long userId, Long eventId);
+
+    void addParticipant(Event event);
+
+    void deleteParticipant(Long eventId);
 }

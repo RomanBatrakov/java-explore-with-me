@@ -11,9 +11,11 @@ public interface RequestService {
 
     RequestDto cancelRequest(Long userId, Long requestId);
 
-    List<RequestDto> getUserRequests(Long id, Long eventId);
+    List<RequestDto> getUserRequests(Long userId, Long eventId);
 
-    RequestDto confirmRequest(Long id, Long eventId, Long requestId);
+    RequestDto confirmRequest(Long userId, Long eventId, Long requestId);
 
-    RequestDto rejectRequest(Long id, Long eventId, Long requestId);
+    RequestDto rejectRequest(Long userId, Long eventId, Long requestId);
+
+    void rejectOtherRequests(Long eventId);
 }

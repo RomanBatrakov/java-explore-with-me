@@ -6,6 +6,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.ewm.event.dto.AdminUpdateEventDto;
+import ru.practicum.ewm.event.dto.AdminUpdateEventRequest;
 import ru.practicum.ewm.event.dto.EventDto;
 import ru.practicum.ewm.event.service.EventService;
 import ru.practicum.ewm.event.model.State;
@@ -40,10 +42,10 @@ public class AdminEventController {
     }
 
     @PutMapping("/{eventId}")
-    public ResponseEntity<EventDto> updateEventByAdmin(@PathVariable(EVENT_ID_PATH_VARIABLE_KEY) Long id,
-                                                       @RequestBody EventDto eventDto) {
-        log.info("PUT request for path /admin/events/{eventId} with eventId={}", id);
-        return ResponseEntity.ok(eventService.updateEventByAdmin(id, eventDto));
+    public ResponseEntity<EventDto> updateEventByAdmin(@PathVariable(EVENT_ID_PATH_VARIABLE_KEY) Long eventId,
+                                                       @RequestBody AdminUpdateEventDto adminUpdateEventDto) {
+        log.info("PUT request for path /admin/events/{eventId} with eventId={}", eventId);
+        return ResponseEntity.ok(eventService.updateEventByAdmin(eventId, adminUpdateEventDto));
     }
 
     @PatchMapping("/{eventId}/publish")

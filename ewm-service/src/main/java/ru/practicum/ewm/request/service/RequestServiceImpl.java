@@ -3,15 +3,17 @@ package ru.practicum.ewm.request.service;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.practicum.ewm.event.dao.EventRepository;
+import ru.practicum.ewm.event.dto.EventDto;
 import ru.practicum.ewm.event.mapper.EventMapper;
 import ru.practicum.ewm.event.model.Event;
 import ru.practicum.ewm.event.service.EventService;
+import ru.practicum.ewm.exeption.NotFoundException;
 import ru.practicum.ewm.exeption.ValidationException;
 import ru.practicum.ewm.request.dao.RequestRepository;
 import ru.practicum.ewm.request.dto.RequestDto;
 import ru.practicum.ewm.request.mapper.RequestMapper;
 import ru.practicum.ewm.request.model.Request;
-import ru.practicum.ewm.request.model.RequestStatus;
 import ru.practicum.ewm.user.mapper.UserMapper;
 import ru.practicum.ewm.user.model.User;
 import ru.practicum.ewm.user.service.UserService;
@@ -24,8 +26,7 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static ru.practicum.ewm.request.model.RequestStatus.CONFIRMED;
-import static ru.practicum.ewm.request.model.RequestStatus.PENDING;
+import static ru.practicum.ewm.request.model.RequestStatus.*;
 
 @Slf4j
 @Service
@@ -56,31 +57,95 @@ public class RequestServiceImpl implements RequestService {
         log.info("Creating request with userId={}, eventId={}", userId, eventId);
         User user = userMapper.toUser(userService.getUserById(userId));
         Event event = eventMapper.toEvent(eventService.getEventById(eventId));
-        if (Objects.equals(event.getInitiator().getId(), userId)
-                && event.getPublishedOn() == null
-                && (event.getParticipantLimit() != 0
-                && event.getParticipantLimit() <= event.getConfirmedRequests()))
-            throw new ValidationException(String.format("Requester with id %s cant be initiator", userId));
+        newRequestValidator(userId, event);
         Request request = Request.builder()
                 .requester(user)
                 .event(event)
                 .created(LocalDateTime.now())
-                .status(event.getRequestModeration() ? PENDING : CONFIRMED)
+                .status(event.getRequestModeration() || event.getParticipantLimit() != 0 ? PENDING : CONFIRMED)
                 .build();
+        if (request.getStatus().equals(CONFIRMED)) eventService.addParticipant(event);
         return requestMapper.toRequestDto(requestRepository.save(request));
     }
 
-    //TODO: проработать правильность выбасываемого исключения
+    //TODO: логику уменьшения запросов в ивенте
     @Override
     public RequestDto cancelRequest(Long userId, Long requestId) {
         try {
             log.info("Canceled request with userId={}, requestId={}", userId, requestId);
             Request request = requestRepository.findById(requestId).get();
             Long id = request.getRequester().getId();
-            if (Objects.equals(userId, id)) requestRepository.deleteById(requestId);
-            return requestMapper.toRequestDto(request);
+            if (Objects.equals(userId, id)) {
+                if (request.getStatus().equals(CONFIRMED))
+                    eventService.deleteParticipant(request.getEvent().getId());
+                requestRepository.deleteById(requestId);
+                return requestMapper.toRequestDto(request);
+            } else {
+                throw new ValidationException("Wrong user or request id");
+            }
         } catch (NoSuchElementException e) {
-            throw new NoSuchElementException(String.format("Request with id %s is not found", requestId));
+            throw new NotFoundException(String.format("Request with id %s is not found", requestId));
+        }
+    }
+
+    @Override
+    public List<RequestDto> getUserRequests(Long userId, Long eventId) {
+        log.info("Getting event requests with userId={}, eventId={}", userId, eventId);
+        EventDto eventDto = eventService.getEventById(eventId);
+        if (!eventDto.getInitiator().getId().equals(userId)) throw new ValidationException("Wrong initiator");
+        try {
+            return requestRepository.findAllByEvent_Id(eventId).stream()
+                    .map(requestMapper::toRequestDto)
+                    .collect(Collectors.toList());
+        } catch (NoSuchElementException e) {
+            return new ArrayList<>();
+        }
+    }
+
+    @Override
+    public RequestDto confirmRequest(Long userId, Long eventId, Long requestId) {
+        log.info("Confirming event request with eventId={}, userId={}, requestId={}", eventId, userId, requestId);
+        Event event = eventMapper.toEvent(eventService.getEventById(eventId));
+        try {
+            Request request = requestRepository.findById(requestId).get();
+            if (userId.equals(event.getInitiator().getId()) && request.getEvent().getId().equals(event.getId())) {
+                request.setStatus(CONFIRMED);
+                return requestMapper.toRequestDto(requestRepository.save(request));
+            } else {
+                throw new ValidationException(String.format("User with id %s is not initiator or wrong event/request",
+                        userId));
+            }
+        } catch (NoSuchElementException e) {
+            throw new NotFoundException(String.format("Request with id %s is not found", requestId));
+        }
+    }
+
+    @Override
+    public RequestDto rejectRequest(Long userId, Long eventId, Long requestId) {
+        return null;
+    }
+
+    @Override
+    public void rejectOtherRequests(Long eventId) {
+        log.info("Rejecting event request with eventId={}", eventId);
+        try {
+            List<Request> requests = requestRepository.findAllByEvent_IdAndStatus(eventId, PENDING).stream()
+                    .peek(x -> x.setStatus(REJECTED))
+                    .collect(Collectors.toList());
+            requestRepository.saveAll(requests);
+        } catch (NoSuchElementException e) {
+            log.info("No more PENDING requests for eventId={}", eventId);
+        }
+    }
+
+    private void newRequestValidator(Long userId, Event event) {
+        log.info("Validating event request with userId={}, event: {}", userId, event);
+        if (Objects.equals(event.getInitiator().getId(), userId)) {
+            throw new ValidationException(String.format("Requester with id %s cant be initiator", userId));
+        } else if (event.getPublishedOn() == null) {
+            throw new ValidationException("Event is not published");
+        } else if ((event.getParticipantLimit() != 0 && event.getParticipantLimit() <= event.getConfirmedRequests())) {
+            throw new ValidationException("Event is full");
         }
     }
 }
