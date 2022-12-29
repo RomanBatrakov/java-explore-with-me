@@ -1,7 +1,8 @@
 package ru.practicum.ewm.event.service;
 
-import lombok.AllArgsConstructor;
+import com.querydsl.core.types.Predicate;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.event.dao.EventRepository;
@@ -14,6 +15,7 @@ import ru.practicum.ewm.request.service.RequestService;
 import ru.practicum.ewm.user.mapper.UserMapper;
 import ru.practicum.ewm.user.model.User;
 import ru.practicum.ewm.user.service.UserService;
+import ru.practicum.ewm.util.QPredicates;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
@@ -23,11 +25,21 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
+import static ru.practicum.ewm.event.model.QEvent.event;
+
 @Slf4j
 @Service
 @Transactional
-@AllArgsConstructor
 public class EventServiceImpl implements EventService {
+    public EventServiceImpl(EventRepository eventRepository, EventMapper eventMapper, UserMapper userMapper,
+                            UserService userService, @Lazy RequestService requestService) {
+        this.eventRepository = eventRepository;
+        this.eventMapper = eventMapper;
+        this.userMapper = userMapper;
+        this.userService = userService;
+        this.requestService = requestService;
+    }
+
     private final EventRepository eventRepository;
     private final EventMapper eventMapper;
     private final UserMapper userMapper;
@@ -40,7 +52,30 @@ public class EventServiceImpl implements EventService {
                                                   LocalDateTime rangeStart, LocalDateTime rangeEnd,
                                                   Boolean onlyAvailable, String sort, Pageable pageable,
                                                   HttpServletRequest request) {
-        return null;
+        log.info("Getting all public events with filters: text={}, categories: {}, paid={}, start={}, end={}," +
+                        " available={}, sort={}",
+                text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort);
+        Predicate predicate = QPredicates.builder()
+                .add(text, txt -> event.annotation.containsIgnoreCase(txt)
+                        .or(event.description.containsIgnoreCase(txt)))
+                .add(categories, event.category.id::in)
+                .add(rangeStart, event.eventDate::after)
+                .add(rangeEnd, event.eventDate::before)
+                .add(paid, event.paid::eq)
+                .buildAnd();
+        List<Event> events;
+        if (predicate == null) {
+            events = eventRepository.findAll(pageable).getContent();
+        } else {
+            events = eventRepository.findAll(predicate, pageable).getContent();
+        }
+        if (onlyAvailable) {
+            events = events.stream()
+                    .filter(e -> (e.getParticipantLimit() != 0L)
+                            && (e.getParticipantLimit() > e.getConfirmedRequests()))
+                    .collect(Collectors.toList());
+        }
+        return eventMapper.toEventShortDtoList(events);
     }
 
     //TODO: добавить отправление запроса в сервис статистики
@@ -73,7 +108,22 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<EventDto> getAllEventsByFilter(List<Long> users, List<State> states, List<Long> categories,
                                                LocalDateTime rangeStart, LocalDateTime rangeEnd, Pageable pageable) {
-        return null;
+        log.info("Getting all events with filters: users: {}, states: {}, categories: {}, start: {}, end: {},",
+                users, states, categories, rangeStart, rangeEnd);
+        Predicate predicate = QPredicates.builder()
+                .add(users, event.initiator.id::in)
+                .add(states, event.state::in)
+                .add(categories, event.category.id::in)
+                .add(rangeStart, event.eventDate::after)
+                .add(rangeEnd, event.eventDate::before)
+                .buildAnd();
+        List<Event> events;
+        if (predicate == null) {
+            events = eventRepository.findAll(pageable).getContent();
+        } else {
+            events = eventRepository.findAll(predicate, pageable).getContent();
+        }
+        return eventMapper.toEvenDtoList(events);
     }
 
     @Override
@@ -113,9 +163,7 @@ public class EventServiceImpl implements EventService {
     public List<EventShortDto> getEventsByUser(Long userId, Pageable pageable) {
         try {
             log.info("Getting events by userId={}", userId);
-            return eventRepository.findEventsByInitiator_Id(userId, pageable).stream()
-                    .map(eventMapper::toEventShortDto)
-                    .collect(Collectors.toList());
+            return eventMapper.toEventShortDtoList(eventRepository.findEventsByInitiator_Id(userId, pageable));
         } catch (NoSuchElementException e) {
             return new ArrayList<>();
         }

@@ -3,21 +3,20 @@ package ru.practicum.ewm.compilation.service;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.compilation.dao.CompilationRepository;
-import ru.practicum.ewm.compilation.dao.EventsCompilationRepository;
 import ru.practicum.ewm.compilation.dto.CompilationDto;
 import ru.practicum.ewm.compilation.dto.NewCompilationDto;
 import ru.practicum.ewm.compilation.mapper.CompilationMapper;
 import ru.practicum.ewm.compilation.model.Compilation;
-import ru.practicum.ewm.event.service.EventService;
+import ru.practicum.ewm.event.mapper.EventMapper;
 import ru.practicum.ewm.event.model.Event;
+import ru.practicum.ewm.event.service.EventService;
 
 import javax.transaction.Transactional;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -25,32 +24,30 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class CompilationServiceImpl implements CompilationService {
     private final CompilationRepository compilationRepository;
-    private final EventsCompilationRepository eventsCompilationRepository;
     private final CompilationMapper compilationMapper;
+    private final EventMapper eventMapper;
     private final EventService eventService;
 
-    //    TODO: добавить добавление событий в подборки
+    //TODO: проверить - добавить добавление событий в подборки
     @Override
-    public List<CompilationDto> getAllCompilations(Boolean pinned, PageRequest pageRequest) {
+    public List<CompilationDto> getAllCompilations(Boolean pinned, Pageable pageable) {
         log.info("Getting all compilations with pinned={}", pinned);
-        return compilationRepository.findAllByPinnedIs(pinned).stream()
-//                .forEach(c -> c.setEvents(eventsCompilationRepository::findEventsByCompilation)
-                .map(compilationMapper::toCompilationDto)
-                .collect(Collectors.toList());
-    }
-
-    //TODO: добавить добавление событий в подборку
-    @Override
-    public CompilationDto getCompilationById(Long id) {
-        try {
-            log.info("Getting compilation with id={}", id);
-            return compilationMapper.toCompilationDto(compilationRepository.findById(id).get());
-        } catch (NoSuchElementException e) {
-            throw new NoSuchElementException(String.format("Compilation with id %s is not found", id));
+        if (pinned == null) {
+            return compilationMapper.toCompilationDtoList(compilationRepository.findAll());
+        } else {
+            return compilationMapper.toCompilationDtoList(compilationRepository.findAllByPinnedIs(pinned));
         }
     }
 
-    //TODO: добавить добавление событий из подборки в бд
+    //TODO: проверить - добавить добавление событий в подборку
+    @Override
+    public CompilationDto getCompilationById(Long id) {
+        log.info("Getting compilation with id={}", id);
+        return compilationMapper.toCompilationDto(compilationRepository.findById(id).orElseThrow(
+                () -> new NoSuchElementException(String.format("compilation with id %s is not found", id))));
+    }
+
+    //TODO: проверить - добавить добавление событий из подборки в бд
     @Override
     public CompilationDto createCompilation(NewCompilationDto newCompilationDto) {
         log.info("Creating compilation: {}", newCompilationDto);
@@ -70,39 +67,28 @@ public class CompilationServiceImpl implements CompilationService {
         }
     }
 
-    //TODO: реализовать метод
     @Override
     public void deleteEventFromCompilation(Long id, Long eventId) {
-
+        log.info("Deleting event with eventId={} from compilation with id={}", eventId, id);
+        Compilation compilation = compilationMapper.toCompilation(getCompilationById(id));
+        Event event = eventMapper.toEvent(eventService.getEventById(eventId));
+        compilation.getEvents().remove(event);
     }
 
-    //TODO: реализовать метод
     @Override
     public void addEventToCompilation(Long id, Long eventId) {
-
+        log.info("Adding event with eventId={} from compilation with id={}", eventId, id);
+        Compilation compilation = compilationMapper.toCompilation(getCompilationById(id));
+        Event event = eventMapper.toEvent(eventService.getEventById(eventId));
+        compilation.getEvents().add(event);
     }
 
     @Override
-    public void pinOffCompilation(Long id) {
-        try {
-            log.info("Pin off compilation with id={}", id);
-            Compilation compilation = compilationRepository.findById(id).get();
-            compilation.setPinned(false);
-            compilationRepository.save(compilation);
-        } catch (NoSuchElementException e) {
-            throw new NoSuchElementException(String.format("Compilation with id %s is not found", id));
-        }
-    }
-
-    @Override
-    public void pinOnCompilation(Long id) {
-        try {
-            log.info("Pin on compilation with id={}", id);
-            Compilation compilation = compilationRepository.findById(id).get();
-            compilation.setPinned(true);
-            compilationRepository.save(compilation);
-        } catch (NoSuchElementException e) {
-            throw new NoSuchElementException(String.format("Compilation with id %s is not found", id));
-        }
+    public void pinChangeCompilation(Long id, Boolean pinned) {
+        log.info("Pin {} compilation with id={}", pinned, id);
+        Compilation compilation = compilationRepository.findById(id).orElseThrow(
+                () -> new NoSuchElementException(String.format("Compilation with id %s is not found", id)));
+        compilation.setPinned(pinned);
+        compilationRepository.save(compilation);
     }
 }

@@ -2,9 +2,11 @@ package ru.practicum.ewm.user.service;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import ru.practicum.ewm.exeption.ValidationException;
 import ru.practicum.ewm.user.dao.UserRepository;
 import ru.practicum.ewm.user.dto.UserDto;
 import ru.practicum.ewm.user.mapper.UserMapper;
@@ -50,8 +52,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto createUser(UserDto userDto) {
+        try {
         log.info("Creating user: {}", userDto);
         return userMapper.toUserDto(userRepository.save(userMapper.toUser(userDto)));
+        } catch (DataIntegrityViolationException e) {
+            throw new ValidationException(String.format("User name %s is already exist", userDto.getName()));
+        }
     }
 
     @Override

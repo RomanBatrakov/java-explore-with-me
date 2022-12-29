@@ -3,7 +3,6 @@ package ru.practicum.ewm.request.service;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.practicum.ewm.event.dao.EventRepository;
 import ru.practicum.ewm.event.dto.EventDto;
 import ru.practicum.ewm.event.mapper.EventMapper;
 import ru.practicum.ewm.event.model.Event;
@@ -14,6 +13,7 @@ import ru.practicum.ewm.request.dao.RequestRepository;
 import ru.practicum.ewm.request.dto.RequestDto;
 import ru.practicum.ewm.request.mapper.RequestMapper;
 import ru.practicum.ewm.request.model.Request;
+import ru.practicum.ewm.request.model.RequestStatus;
 import ru.practicum.ewm.user.mapper.UserMapper;
 import ru.practicum.ewm.user.model.User;
 import ru.practicum.ewm.user.service.UserService;
@@ -68,7 +68,6 @@ public class RequestServiceImpl implements RequestService {
         return requestMapper.toRequestDto(requestRepository.save(request));
     }
 
-    //TODO: логику уменьшения запросов в ивенте
     @Override
     public RequestDto cancelRequest(Long userId, Long requestId) {
         try {
@@ -84,7 +83,7 @@ public class RequestServiceImpl implements RequestService {
                 throw new ValidationException("Wrong user or request id");
             }
         } catch (NoSuchElementException e) {
-            throw new NotFoundException(String.format("Request with id %s is not found", requestId));
+            throw new NoSuchElementException(String.format("Request with id %s is not found", requestId));
         }
     }
 
@@ -103,26 +102,21 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
-    public RequestDto confirmRequest(Long userId, Long eventId, Long requestId) {
-        log.info("Confirming event request with eventId={}, userId={}, requestId={}", eventId, userId, requestId);
+    public RequestDto changeRequestStatus(Long userId, Long eventId, Long requestId, RequestStatus status) {
+        log.info("{} event request with eventId={}, userId={}, requestId={}", status, eventId, userId, requestId);
         Event event = eventMapper.toEvent(eventService.getEventById(eventId));
         try {
             Request request = requestRepository.findById(requestId).get();
             if (userId.equals(event.getInitiator().getId()) && request.getEvent().getId().equals(event.getId())) {
-                request.setStatus(CONFIRMED);
+                request.setStatus(status);
                 return requestMapper.toRequestDto(requestRepository.save(request));
             } else {
                 throw new ValidationException(String.format("User with id %s is not initiator or wrong event/request",
                         userId));
             }
         } catch (NoSuchElementException e) {
-            throw new NotFoundException(String.format("Request with id %s is not found", requestId));
+            throw new NoSuchElementException(String.format("Request with id %s is not found", requestId));
         }
-    }
-
-    @Override
-    public RequestDto rejectRequest(Long userId, Long eventId, Long requestId) {
-        return null;
     }
 
     @Override

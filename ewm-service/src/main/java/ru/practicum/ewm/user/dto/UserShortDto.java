@@ -12,7 +12,6 @@ import javax.validation.constraints.Size;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserShortDto {
-    //TODO: возможно и не нужен он
     private Long id;
     @NotBlank(message = "Name is mandatory")
     @NotNull(message = "Name is null")

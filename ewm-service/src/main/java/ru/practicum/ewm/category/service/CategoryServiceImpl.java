@@ -2,18 +2,20 @@ package ru.practicum.ewm.category.service;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.category.dao.CategoryRepository;
 import ru.practicum.ewm.category.dto.CategoryDto;
 import ru.practicum.ewm.category.mapper.CategoryMapper;
-import ru.practicum.ewm.user.dao.UserRepository;
-import ru.practicum.ewm.user.mapper.UserMapper;
+import ru.practicum.ewm.category.model.Category;
+import ru.practicum.ewm.event.service.EventService;
+import ru.practicum.ewm.exeption.ValidationException;
 
 import javax.transaction.Transactional;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -23,6 +25,7 @@ import java.util.stream.Collectors;
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
+    private final EventService eventService;
 
     @Override
     public List<CategoryDto> getAllCategories(Pageable pageable) {
@@ -41,29 +44,36 @@ public class CategoryServiceImpl implements CategoryService {
             throw new NoSuchElementException(String.format("Category with id %s is not found", id));
         }
     }
-    //TODO: проверить на то, какая ошибка должна выпасть
+
+    //TODO: разобраться, почему не отлавливает ошибку
     @Override
     public CategoryDto updateCategory(CategoryDto categoryDto) {
-        getCategoryById(categoryDto.getId());
-        try {
-            log.info("Updating category: {}", categoryDto);
-            return categoryMapper.toCategoryDto(categoryRepository.save(categoryMapper.toCategory(categoryDto)));
-        } catch (NoSuchElementException e) {
-            throw new NoSuchElementException(String.format("Category %s is not found", categoryDto));
-        }
+        log.info("Updating category: {}", categoryDto);
+        Category category = categoryMapper.toCategory(getCategoryById(categoryDto.getId()));
+        Optional<Category> x = categoryRepository.findCategoriesByName(categoryDto.getName());
+        if (x.isPresent())
+            throw new ValidationException(String.format("Category name %s is already exist", categoryDto.getName()));
+        category.setName(categoryDto.getName());
+        return categoryMapper.toCategoryDto(categoryRepository.save(category));
     }
 
     @Override
     public CategoryDto createCategory(CategoryDto categoryDto) {
-        log.info("Creating category: {}", categoryDto);
-        return categoryMapper.toCategoryDto(categoryRepository.save(categoryMapper.toCategory(categoryDto)));
+        try {
+            log.info("Creating category: {}", categoryDto);
+            return categoryMapper.toCategoryDto(categoryRepository.save(categoryMapper.toCategory(categoryDto)));
+        } catch (DataIntegrityViolationException e) {
+            throw new ValidationException(String.format("Category name %s is already exist", categoryDto.getName()));
+        }
     }
 
-    //TODO: проверить на то, что ни одно событие не связано с категорией и на то, какая ошибка должна выпасть
     @Override
     public void deleteCategory(Long id) {
         try {
             log.info("Deleting category with id={}", id);
+            int size = eventService.getAllEventsByFilter(null, null, Collections.singletonList(id),
+                    null, null, PageRequest.of(0, 10)).size();
+            if (size > 0) throw new ValidationException(String.format("Category with id %s have events", id));
             categoryRepository.deleteById(id);
         } catch (EmptyResultDataAccessException e) {
             throw new NoSuchElementException(String.format("Category with id %s is not found", id));

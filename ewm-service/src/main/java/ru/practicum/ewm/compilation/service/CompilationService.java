@@ -1,13 +1,14 @@
 package ru.practicum.ewm.compilation.service;
 
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import ru.practicum.ewm.compilation.dto.CompilationDto;
 import ru.practicum.ewm.compilation.dto.NewCompilationDto;
 
 import java.util.List;
 
 public interface CompilationService {
-    List<CompilationDto> getAllCompilations(Boolean pinned, PageRequest pageRequest);
+    List<CompilationDto> getAllCompilations(Boolean pinned, Pageable pageable);
 
     CompilationDto getCompilationById(Long id);
 
@@ -19,7 +20,5 @@ public interface CompilationService {
 
     void addEventToCompilation(Long id, Long eventId);
 
-    void pinOffCompilation(Long id);
-
-    void pinOnCompilation(Long id);
+    void pinChangeCompilation(Long id, Boolean pinned);
 }

@@ -16,13 +16,13 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@ScriptAssert(lang = "javascript", script = "_this.eventDate.before(LocalDateTime.now().plusHours(2))")
+//@ScriptAssert(lang = "javascript", script = "_this.eventDate.before(LocalDateTime.now().plusHours(2))")
 public class NewEventDto {
     @NotNull
     @Size(min=20, max=2000)
     private String annotation;
     @NotNull
-    private CategoryDto category;
+    private Long category;
     @NotNull
     @Size(min=20, max=7000)
     private String description;

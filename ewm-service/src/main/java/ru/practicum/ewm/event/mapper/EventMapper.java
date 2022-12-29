@@ -11,7 +11,13 @@ public interface EventMapper {
     Event toEvent(EventDto eventDto);
 
     EventDto toEventDto(Event event);
+
     Event toNewEvent(NewEventDto newEventDto);
+
+    EventShortDto toEventShortDto(Event event);
+
+    List<EventShortDto> toEventShortDtoList(List<Event> events);
+    List<EventDto> toEvenDtoList(List<Event> events);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     Event updateEventByAdmin(AdminUpdateEventDto adminUpdateEventDto, @MappingTarget Event event);
@@ -19,5 +25,4 @@ public interface EventMapper {
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     Event updateEventByUser(UpdateEventDto updateEventDto, @MappingTarget Event event);
 
-    EventShortDto toEventShortDto(Event event);
 }

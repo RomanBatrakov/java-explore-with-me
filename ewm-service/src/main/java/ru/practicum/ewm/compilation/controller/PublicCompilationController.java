@@ -21,7 +21,7 @@ import java.util.List;
 @AllArgsConstructor
 public class PublicCompilationController {
     private final CompilationService compilationService;
-//TODO: поверить работу когда пина нет
+
     @GetMapping
     public ResponseEntity<List<CompilationDto>> getAllCompilations(@RequestParam(required = false) Boolean pinned,
                                                                    @RequestParam(required = false, defaultValue = "0")

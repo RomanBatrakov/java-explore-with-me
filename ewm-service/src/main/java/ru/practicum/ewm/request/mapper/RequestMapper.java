@@ -9,7 +9,4 @@ public interface RequestMapper {
     @Mapping(target = "requester", source = "requester.id")
     @Mapping(target = "event", source = "event.id")
     RequestDto toRequestDto(Request request);
-
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    Request partialUpdate(RequestDto requestDto, @MappingTarget Request request);
 }

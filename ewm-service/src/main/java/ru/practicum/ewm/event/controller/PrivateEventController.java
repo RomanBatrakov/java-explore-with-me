@@ -12,6 +12,7 @@ import ru.practicum.ewm.event.dto.NewEventDto;
 import ru.practicum.ewm.event.dto.UpdateEventDto;
 import ru.practicum.ewm.event.service.EventService;
 import ru.practicum.ewm.request.dto.RequestDto;
+import ru.practicum.ewm.request.model.RequestStatus;
 import ru.practicum.ewm.request.service.RequestService;
 
 import javax.validation.Valid;
@@ -50,7 +51,7 @@ public class PrivateEventController {
     @PostMapping
     public ResponseEntity<EventDto> createEventByUser(@PathVariable(USER_ID_PATH_VARIABLE_KEY) Long userId,
                                                       @Valid @RequestBody NewEventDto newEventDto) {
-        log.info("POST request POST for path /users/{userId}/events with userId={}", userId);
+        log.info("POST request for path /users/{userId}/events with userId={}", userId);
         return ResponseEntity.ok(eventService.createEventByUser(newEventDto, userId));
     }
 
@@ -82,7 +83,8 @@ public class PrivateEventController {
                                                      @PathVariable(REQUEST_ID_PATH_VARIABLE_KEY) Long requestId) {
         log.info("PATCH request for path /users/{userId}/events/{eventId}/requests/{reqId}/confirm with userId={}," +
                 " eventId={}, reqId={}", userId, eventId, requestId);
-        return ResponseEntity.ok(requestService.confirmRequest(userId, eventId, requestId));
+        return ResponseEntity.ok(requestService
+                .changeRequestStatus(userId, eventId, requestId, RequestStatus.CONFIRMED));
     }
 
     @PatchMapping("/{eventId}/requests/{reqId}/reject")
@@ -91,7 +93,8 @@ public class PrivateEventController {
                                                     @PathVariable(REQUEST_ID_PATH_VARIABLE_KEY) Long requestId) {
         log.info("PATCH request for path /users/{userId}/events/{eventId}/requests/{reqId}/reject with userId={}," +
                 " eventId={}, reqId={}", userId, eventId, requestId);
-        return ResponseEntity.ok(requestService.rejectRequest(userId, eventId, requestId));
+        return ResponseEntity.ok(requestService
+                .changeRequestStatus(userId, eventId, requestId, RequestStatus.REJECTED));
     }
 
 }

@@ -50,13 +50,12 @@ public class AdminCompilationController {
     @DeleteMapping("/{compId}/pin")
     public void pinOffCompilation(@PathVariable("compId") Long id) {
         log.info("DELETE request for path /admin/compilations/{compId}/pin with compId={}", id);
-        compilationService.pinOffCompilation(id);
+        compilationService.pinChangeCompilation(id, false);
     }
 
     @PatchMapping("/{compId}/pin")
     public void pinOnCompilation(@PathVariable("compId") Long id) {
         log.info("PATCH request for path /admin/compilations/{compId}/pin with compId={}", id);
-        compilationService.pinOnCompilation(id);
+        compilationService.pinChangeCompilation(id, true);
     }
-
 }

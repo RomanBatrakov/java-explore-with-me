@@ -1,6 +1,7 @@
 package ru.practicum.ewm.request.service;
 
 import ru.practicum.ewm.request.dto.RequestDto;
+import ru.practicum.ewm.request.model.RequestStatus;
 
 import java.util.List;
 
@@ -13,9 +14,7 @@ public interface RequestService {
 
     List<RequestDto> getUserRequests(Long userId, Long eventId);
 
-    RequestDto confirmRequest(Long userId, Long eventId, Long requestId);
-
-    RequestDto rejectRequest(Long userId, Long eventId, Long requestId);
-
     void rejectOtherRequests(Long eventId);
+
+    RequestDto changeRequestStatus(Long userId, Long eventId, Long requestId, RequestStatus status);
 }

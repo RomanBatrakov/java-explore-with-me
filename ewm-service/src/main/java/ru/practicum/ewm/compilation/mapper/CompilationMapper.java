@@ -12,12 +12,7 @@ public interface CompilationMapper {
     Compilation toCompilation(CompilationDto compilationDto);
 
     CompilationDto toCompilationDto(Compilation compilation);
-
-//    @Mapping(source = "events", target = "events", qualifiedByName = "eventsIdsToEvents")
+    List<CompilationDto> toCompilationDtoList(List<Compilation> compilations);
     @Mapping(target = "events", ignore = true)
     Compilation toCompilation(NewCompilationDto newCompilationDto);
-
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    Compilation partialUpdate(CompilationDto compilationDto, @MappingTarget Compilation compilation);
-
-}
+    }
