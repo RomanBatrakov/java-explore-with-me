@@ -5,6 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import ru.practicum.ewm.category.mapper.CategoryMapper;
+import ru.practicum.ewm.category.model.Category;
+import ru.practicum.ewm.category.service.CategoryService;
 import ru.practicum.ewm.event.dao.EventRepository;
 import ru.practicum.ewm.event.dto.*;
 import ru.practicum.ewm.event.mapper.EventMapper;
@@ -32,12 +35,15 @@ import static ru.practicum.ewm.event.model.QEvent.event;
 @Transactional
 public class EventServiceImpl implements EventService {
     public EventServiceImpl(EventRepository eventRepository, EventMapper eventMapper, UserMapper userMapper,
-                            UserService userService, @Lazy RequestService requestService) {
+                            UserService userService, @Lazy RequestService requestService,
+                            @Lazy CategoryService categoryService, CategoryMapper categoryMapper) {
         this.eventRepository = eventRepository;
         this.eventMapper = eventMapper;
         this.userMapper = userMapper;
         this.userService = userService;
         this.requestService = requestService;
+        this.categoryService = categoryService;
+        this.categoryMapper = categoryMapper;
     }
 
     private final EventRepository eventRepository;
@@ -45,6 +51,9 @@ public class EventServiceImpl implements EventService {
     private final UserMapper userMapper;
     private final UserService userService;
     private final RequestService requestService;
+    private final CategoryService categoryService;
+    private final CategoryMapper categoryMapper;
+
 
     //TODO: добавить отправление запроса в сервис статистики
     @Override
@@ -129,8 +138,13 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventDto updateEventByAdmin(Long eventId, AdminUpdateEventDto adminUpdateEventDto) {
         log.info("Updating event by admin, eventId={}", eventId);
+        Long catId = adminUpdateEventDto.getCategory();
         Event event = eventMapper.toEvent(getEventById(eventId));
         Event updatedEvent = eventMapper.updateEventByAdmin(adminUpdateEventDto, event);
+        if (catId != null) {
+            Category category = categoryMapper.toCategory(categoryService.getCategoryById(catId));
+            updatedEvent.setCategory(category);
+        }
         return eventMapper.toEventDto(eventRepository.save(updatedEvent));
     }
 
@@ -138,9 +152,10 @@ public class EventServiceImpl implements EventService {
     public EventDto publishEvent(Long eventId) {
         log.info("Publishing event by admin, eventId={}", eventId);
         Event event = eventMapper.toEvent(getEventById(eventId));
-        if (event.getEventDate().isBefore(LocalDateTime.now().plusHours(1))
+        if (event.getEventDate().isAfter(LocalDateTime.now().withNano(0).plusHours(1))
                 && event.getState().equals(State.PENDING)) {
             event.setState(State.PUBLISHED);
+            event.setPublishedOn(LocalDateTime.now().withNano(0));
             return eventMapper.toEventDto(eventRepository.save(event));
         } else {
             throw new ValidationException("Can't publish this event");
@@ -172,15 +187,20 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventDto updateEventByUser(Long userId, UpdateEventDto updateEventDto) {
         log.info("Updating event by user: userId={}", userId);
-        Long eventId = updateEventDto.getId();
+        Long eventId = updateEventDto.getEventId();
+        Long catId = updateEventDto.getCategory();
         try {
             Event event = eventRepository.findEventByIdAndInitiator_Id(eventId, userId);
             if (event.getState().equals(State.PUBLISHED)
-                    || event.getEventDate().isBefore(LocalDateTime.now().plusHours(2)))
+                    || event.getEventDate().isBefore(LocalDateTime.now().withNano(0).plusHours(2)))
                 throw new ValidationException("Wrong state or eventDate");
             if (event.getState().equals(State.CANCELED)) event.setState(State.PENDING);
             Event updatedEvent = eventMapper.updateEventByUser(updateEventDto, event);
-            return eventMapper.toEventDto(updatedEvent);
+            if (catId != null) {
+                Category category = categoryMapper.toCategory(categoryService.getCategoryById(catId));
+                updatedEvent.setCategory(category);
+            }
+            return eventMapper.toEventDto(eventRepository.save(updatedEvent));
         } catch (NoSuchElementException e) {
             throw new NoSuchElementException(String.format("Event with id %s is not found", eventId));
         }
@@ -190,11 +210,13 @@ public class EventServiceImpl implements EventService {
     public EventDto createEventByUser(NewEventDto newEventDto, Long userId) {
         log.info("Creating event by user: userId={}", userId);
         User user = userMapper.toUser(userService.getUserById(userId));
-        Event event = eventMapper.toNewEvent(newEventDto);
-        if (event.getEventDate().isBefore(LocalDateTime.now().plusHours(2)))
+        Event event = eventMapper.fromNewEvent(newEventDto);
+        Category category = categoryMapper.toCategory(categoryService.getCategoryById(newEventDto.getCategory()));
+        if (event.getEventDate().isBefore(LocalDateTime.now().withNano(0).plusHours(2)))
             throw new ValidationException("Wrong eventDate");
         event.setInitiator(user);
-        event.setCreatedOn(LocalDateTime.now());
+        event.setCategory(category);
+        event.setCreatedOn(LocalDateTime.now().withNano(0));
         event.setConfirmedRequests(0L);
         event.setViews(0L);
         event.setState(State.PENDING);

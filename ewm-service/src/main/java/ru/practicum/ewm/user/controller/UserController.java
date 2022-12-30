@@ -22,7 +22,6 @@ import java.util.Set;
 @AllArgsConstructor
 public class UserController {
     private final UserService userService;
-//TODO: роверить метод, что корректно список выдает в дефолте
     @GetMapping
     public ResponseEntity<List<UserDto>> getUsersByIds(@RequestParam(required = false) Set<Long> ids,
                                                        @RequestParam(required = false, defaultValue = "0")

@@ -37,7 +37,6 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    //TODO: проверить этот метод на корректность работы при отсутствии списка id
     @Override
     public List<UserDto> getUsersByIds(Set<Long> ids, Pageable pageable) {
         try {
@@ -53,8 +52,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto createUser(UserDto userDto) {
         try {
-        log.info("Creating user: {}", userDto);
-        return userMapper.toUserDto(userRepository.save(userMapper.toUser(userDto)));
+            log.info("Creating user: {}", userDto);
+            return userMapper.toUserDto(userRepository.save(userMapper.toUser(userDto)));
         } catch (DataIntegrityViolationException e) {
             throw new ValidationException(String.format("User name %s is already exist", userDto.getName()));
         }

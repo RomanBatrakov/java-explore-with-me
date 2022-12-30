@@ -28,7 +28,6 @@ public class CompilationServiceImpl implements CompilationService {
     private final EventMapper eventMapper;
     private final EventService eventService;
 
-    //TODO: проверить - добавить добавление событий в подборки
     @Override
     public List<CompilationDto> getAllCompilations(Boolean pinned, Pageable pageable) {
         log.info("Getting all compilations with pinned={}", pinned);
@@ -39,7 +38,6 @@ public class CompilationServiceImpl implements CompilationService {
         }
     }
 
-    //TODO: проверить - добавить добавление событий в подборку
     @Override
     public CompilationDto getCompilationById(Long id) {
         log.info("Getting compilation with id={}", id);
@@ -47,7 +45,6 @@ public class CompilationServiceImpl implements CompilationService {
                 () -> new NoSuchElementException(String.format("compilation with id %s is not found", id))));
     }
 
-    //TODO: проверить - добавить добавление событий из подборки в бд
     @Override
     public CompilationDto createCompilation(NewCompilationDto newCompilationDto) {
         log.info("Creating compilation: {}", newCompilationDto);
@@ -71,8 +68,8 @@ public class CompilationServiceImpl implements CompilationService {
     public void deleteEventFromCompilation(Long id, Long eventId) {
         log.info("Deleting event with eventId={} from compilation with id={}", eventId, id);
         Compilation compilation = compilationMapper.toCompilation(getCompilationById(id));
-        Event event = eventMapper.toEvent(eventService.getEventById(eventId));
-        compilation.getEvents().remove(event);
+        compilation.getEvents().removeIf(x -> x.getId().equals(eventId));
+        compilationRepository.save(compilation);
     }
 
     @Override
@@ -81,6 +78,7 @@ public class CompilationServiceImpl implements CompilationService {
         Compilation compilation = compilationMapper.toCompilation(getCompilationById(id));
         Event event = eventMapper.toEvent(eventService.getEventById(eventId));
         compilation.getEvents().add(event);
+        compilationRepository.save(compilation);
     }
 
     @Override

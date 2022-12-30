@@ -7,7 +7,6 @@ import ru.practicum.ewm.event.dto.EventDto;
 import ru.practicum.ewm.event.mapper.EventMapper;
 import ru.practicum.ewm.event.model.Event;
 import ru.practicum.ewm.event.service.EventService;
-import ru.practicum.ewm.exeption.NotFoundException;
 import ru.practicum.ewm.exeption.ValidationException;
 import ru.practicum.ewm.request.dao.RequestRepository;
 import ru.practicum.ewm.request.dto.RequestDto;
@@ -61,7 +60,7 @@ public class RequestServiceImpl implements RequestService {
         Request request = Request.builder()
                 .requester(user)
                 .event(event)
-                .created(LocalDateTime.now())
+                .created(LocalDateTime.now().withNano(0))
                 .status(event.getRequestModeration() || event.getParticipantLimit() != 0 ? PENDING : CONFIRMED)
                 .build();
         if (request.getStatus().equals(CONFIRMED)) eventService.addParticipant(event);
@@ -77,8 +76,8 @@ public class RequestServiceImpl implements RequestService {
             if (Objects.equals(userId, id)) {
                 if (request.getStatus().equals(CONFIRMED))
                     eventService.deleteParticipant(request.getEvent().getId());
-                requestRepository.deleteById(requestId);
-                return requestMapper.toRequestDto(request);
+                request.setStatus(CANCELED);
+                return requestMapper.toRequestDto(requestRepository.save(request));
             } else {
                 throw new ValidationException("Wrong user or request id");
             }

@@ -3,6 +3,7 @@ package ru.practicum.ewm.event.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import org.hibernate.validator.constraints.ScriptAssert;
+import org.springframework.format.annotation.DateTimeFormat;
 import ru.practicum.ewm.category.dto.CategoryDto;
 import ru.practicum.ewm.event.model.State;
 import ru.practicum.ewm.location.dto.LocationDto;
@@ -16,27 +17,21 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@ScriptAssert(lang = "javascript", script = "_this.eventDate.before(LocalDateTime.now().plusHours(2))")
+//@ScriptAssert(lang = "javascript", script = "_this.eventDate.before(LocalDateTime.now().plusHours(2))")
 public class UpdateEventDto {
     @NotNull
+    private Long eventId;
     @Size(min=20, max=2000)
     private String annotation;
-    @NotNull
-    private CategoryDto category;
-    @NotNull
+    private Long category;
     @Size(min=20, max=7000)
     private String description;
-    @NotNull
     @Future
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime eventDate;
-    @NotNull
-    private Long id;
-    @NotNull
     private Boolean paid;
-    @NotNull
     private Long participantLimit;
-    @NotNull
     @Size(min=3, max=120)
     private String title;
 }

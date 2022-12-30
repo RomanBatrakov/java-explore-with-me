@@ -2,8 +2,7 @@ package ru.practicum.ewm.event.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
-import org.hibernate.validator.constraints.ScriptAssert;
-import ru.practicum.ewm.category.dto.CategoryDto;
+import org.springframework.format.annotation.DateTimeFormat;
 import ru.practicum.ewm.location.dto.LocationDto;
 
 import javax.validation.constraints.Future;
@@ -29,6 +28,7 @@ public class NewEventDto {
     @NotNull
     @Future
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime eventDate;
     @NotNull
     private LocationDto location;
