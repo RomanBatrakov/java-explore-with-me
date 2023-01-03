@@ -24,7 +24,7 @@ import java.util.List;
 @RequestMapping(path = "/events")
 @AllArgsConstructor
 public class PublicEventController {
-    private final String SORT_VALIDATION = "^VIEWS$|^EVENT_DATE$";
+    private final String sortValidation = "^VIEWS$|^EVENT_DATE$";
     private final EventService eventService;
 
     @GetMapping
@@ -36,7 +36,7 @@ public class PublicEventController {
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
             @RequestParam(defaultValue = "false") Boolean onlyAvailable,
             @RequestParam(required = false)
-            @Pattern(regexp = SORT_VALIDATION, message = "Incorrect type of sort") String sort,
+            @Pattern(regexp = sortValidation, message = "Incorrect type of sort") String sort,
             @RequestParam(defaultValue = "0") @PositiveOrZero int from,
             @RequestParam(defaultValue = "10") @Positive int size,
             HttpServletRequest request) {
