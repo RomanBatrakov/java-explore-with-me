@@ -2,6 +2,7 @@ package ru.practicum.ewm.category.controller;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -31,8 +32,9 @@ public class AdminCategoryController {
     }
 
     @DeleteMapping("/{catId}")
-    public void deleteCategory(@PathVariable("catId") Long id) {
+    public ResponseEntity<Object> deleteCategory(@PathVariable("catId") Long id) {
         log.info("DELETE request for path /admin/categories/{catId} with catId={}", id);
         categoryService.deleteCategory(id);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

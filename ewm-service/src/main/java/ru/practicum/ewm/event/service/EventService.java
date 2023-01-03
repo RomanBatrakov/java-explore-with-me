@@ -20,8 +20,8 @@ public interface EventService {
 
     List<Event> eventsIdsToEvents(List<Long> events);
 
-    List<EventDto> getAllEventsByFilter(List<Long> users, List<State> states, List<Long> categories, LocalDateTime rangeStart,
-                                LocalDateTime rangeEnd, Pageable pageable);
+    List<EventDto> getAllEventsByFilter(List<Long> users, List<State> states, List<Long> categories,
+                                        LocalDateTime rangeStart, LocalDateTime rangeEnd, Pageable pageable);
 
     EventDto updateEventByAdmin(Long id, AdminUpdateEventDto eventDto);
 

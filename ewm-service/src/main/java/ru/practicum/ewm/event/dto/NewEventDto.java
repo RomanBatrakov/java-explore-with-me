@@ -15,33 +15,32 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-//@ScriptAssert(lang = "javascript", script = "_this.eventDate.before(LocalDateTime.now().plusHours(2))")
 public class NewEventDto {
-    @NotNull
-    @Size(min=20, max=2000)
+    @NotNull(message = "annotation is null")
+    @Size(min = 20, max = 2000)
     private String annotation;
-    @NotNull
+    @NotNull(message = "category is null")
     private Long category;
-    @NotNull
-    @Size(min=20, max=7000)
+    @NotNull(message = "description is null")
+    @Size(min = 20, max = 7000)
     private String description;
     @NotNull
     @Future
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime eventDate;
-    @NotNull
+    @NotNull(message = "location is null")
     private LocationDto location;
-    @NotNull
+    @NotNull(message = "paid is null")
     @Builder.Default
     private Boolean paid = false;
-    @NotNull
+    @NotNull(message = "participantLimit is null")
     @Builder.Default
     private Long participantLimit = 0L;
-    @NotNull
+    @NotNull(message = "requestModeration is null")
     @Builder.Default
     private Boolean requestModeration = true;
-    @NotNull
-    @Size(min=3, max=120)
+    @NotNull(message = "title is null")
+    @Size(min = 3, max = 120)
     private String title;
 }

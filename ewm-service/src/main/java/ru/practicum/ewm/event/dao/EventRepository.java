@@ -12,7 +12,10 @@ import java.util.List;
 @Repository
 public interface EventRepository extends JpaRepository<Event, Long>, QuerydslPredicateExecutor<Event> {
     List<Event> findEventsByIdIn(List<Long> longs);
+
     Event findEventByIdAndState(Long eventId, State state);
+
     Event findEventByIdAndInitiator_Id(Long eventId, Long userId);
+
     List<Event> findEventsByInitiator_Id(Long userId, Pageable pageable);
 }

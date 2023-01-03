@@ -11,12 +11,14 @@ public interface EventMapper {
     Event toEvent(EventDto eventDto);
 
     EventDto toEventDto(Event event);
+
     @Mapping(target = "category", ignore = true)
     Event fromNewEvent(NewEventDto newEventDto);
 
     EventShortDto toEventShortDto(Event event);
 
     List<EventShortDto> toEventShortDtoList(List<Event> events);
+
     List<EventDto> toEvenDtoList(List<Event> events);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
@@ -25,7 +27,6 @@ public interface EventMapper {
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "category", ignore = true)
-    @Mapping(target = "id", source="eventId")
+    @Mapping(target = "id", source = "eventId")
     Event updateEventByUser(UpdateEventDto updateEventDto, @MappingTarget Event event);
-
 }

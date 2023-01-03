@@ -26,7 +26,7 @@ public class RequestController {
 
     @PostMapping
     public ResponseEntity<RequestDto> createRequest(@PathVariable("userId") Long userId,
-                                                        @RequestParam Long eventId) {
+                                                    @RequestParam Long eventId) {
         log.info("POST request for path /users/{userId}/requests with userId={}, eventId={}", userId, eventId);
         return ResponseEntity.ok(requestService.createRequest(userId, eventId));
     }

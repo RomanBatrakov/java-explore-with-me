@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
 import ru.practicum.ewm.category.mapper.CategoryMapper;
 import ru.practicum.ewm.category.model.Category;
 import ru.practicum.ewm.category.service.CategoryService;
@@ -14,38 +15,31 @@ import ru.practicum.ewm.event.mapper.EventMapper;
 import ru.practicum.ewm.event.model.Event;
 import ru.practicum.ewm.event.model.State;
 import ru.practicum.ewm.exeption.ValidationException;
+import ru.practicum.ewm.hit.client.HitClient;
+import ru.practicum.ewm.hit.model.Hit;
 import ru.practicum.ewm.request.service.RequestService;
 import ru.practicum.ewm.user.mapper.UserMapper;
 import ru.practicum.ewm.user.model.User;
 import ru.practicum.ewm.user.service.UserService;
-import ru.practicum.ewm.util.QPredicates;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
-import static ru.practicum.ewm.event.model.QEvent.event;
+import static ru.practicum.ewm.util.QPredicates.createAdminPredicate;
+import static ru.practicum.ewm.util.QPredicates.createPublicPredicate;
 
 @Slf4j
 @Service
 @Transactional
 public class EventServiceImpl implements EventService {
-    public EventServiceImpl(EventRepository eventRepository, EventMapper eventMapper, UserMapper userMapper,
-                            UserService userService, @Lazy RequestService requestService,
-                            @Lazy CategoryService categoryService, CategoryMapper categoryMapper) {
-        this.eventRepository = eventRepository;
-        this.eventMapper = eventMapper;
-        this.userMapper = userMapper;
-        this.userService = userService;
-        this.requestService = requestService;
-        this.categoryService = categoryService;
-        this.categoryMapper = categoryMapper;
-    }
-
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    public static final LocalDateTime LOCAL_DATE_TIME_NOW = LocalDateTime.now().withNano(0);
     private final EventRepository eventRepository;
     private final EventMapper eventMapper;
     private final UserMapper userMapper;
@@ -53,31 +47,31 @@ public class EventServiceImpl implements EventService {
     private final RequestService requestService;
     private final CategoryService categoryService;
     private final CategoryMapper categoryMapper;
+    private final HitClient hitClient;
 
+    public EventServiceImpl(EventRepository eventRepository, EventMapper eventMapper, UserMapper userMapper,
+                            UserService userService, @Lazy RequestService requestService,
+                            @Lazy CategoryService categoryService, CategoryMapper categoryMapper, HitClient hitClient) {
+        this.eventRepository = eventRepository;
+        this.eventMapper = eventMapper;
+        this.userMapper = userMapper;
+        this.userService = userService;
+        this.requestService = requestService;
+        this.categoryService = categoryService;
+        this.categoryMapper = categoryMapper;
+        this.hitClient = hitClient;
+    }
 
-    //TODO: добавить отправление запроса в сервис статистики
     @Override
     public List<EventShortDto> getAllPublicEvents(String text, Long[] categories, Boolean paid,
                                                   LocalDateTime rangeStart, LocalDateTime rangeEnd,
                                                   Boolean onlyAvailable, String sort, Pageable pageable,
                                                   HttpServletRequest request) {
-        log.info("Getting all public events with filters: text={}, categories: {}, paid={}, start={}, end={}," +
-                        " available={}, sort={}",
-                text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort);
-        Predicate predicate = QPredicates.builder()
-                .add(text, txt -> event.annotation.containsIgnoreCase(txt)
-                        .or(event.description.containsIgnoreCase(txt)))
-                .add(categories, event.category.id::in)
-                .add(rangeStart, event.eventDate::after)
-                .add(rangeEnd, event.eventDate::before)
-                .add(paid, event.paid::eq)
-                .buildAnd();
-        List<Event> events;
-        if (predicate == null) {
-            events = eventRepository.findAll(pageable).getContent();
-        } else {
-            events = eventRepository.findAll(predicate, pageable).getContent();
-        }
+        log.info("Getting all public events with filters");
+        postHitToStatsServer(request);
+        Predicate predicate = createPublicPredicate(text, categories, paid, rangeStart, rangeEnd);
+        List<Event> events = (predicate == null) ? eventRepository.findAll(pageable).getContent()
+                : eventRepository.findAll(predicate, pageable).getContent();
         if (onlyAvailable) {
             events = events.stream()
                     .filter(e -> (e.getParticipantLimit() != 0L)
@@ -87,12 +81,14 @@ public class EventServiceImpl implements EventService {
         return eventMapper.toEventShortDtoList(events);
     }
 
-    //TODO: добавить отправление запроса в сервис статистики
     @Override
     public EventDto getPublicEventById(Long eventId, HttpServletRequest request) {
         try {
             log.info("Getting public event by id={}", eventId);
-            return eventMapper.toEventDto(eventRepository.findEventByIdAndState(eventId, State.PUBLISHED));
+            postHitToStatsServer(request);
+            Event event = eventRepository.findEventByIdAndState(eventId, State.PUBLISHED);
+            event.setViews(event.getViews() + 1);
+            return eventMapper.toEventDto(event);
         } catch (NoSuchElementException e) {
             throw new NoSuchElementException(String.format("Event with id %s is not found", eventId));
         }
@@ -119,19 +115,9 @@ public class EventServiceImpl implements EventService {
                                                LocalDateTime rangeStart, LocalDateTime rangeEnd, Pageable pageable) {
         log.info("Getting all events with filters: users: {}, states: {}, categories: {}, start: {}, end: {},",
                 users, states, categories, rangeStart, rangeEnd);
-        Predicate predicate = QPredicates.builder()
-                .add(users, event.initiator.id::in)
-                .add(states, event.state::in)
-                .add(categories, event.category.id::in)
-                .add(rangeStart, event.eventDate::after)
-                .add(rangeEnd, event.eventDate::before)
-                .buildAnd();
-        List<Event> events;
-        if (predicate == null) {
-            events = eventRepository.findAll(pageable).getContent();
-        } else {
-            events = eventRepository.findAll(predicate, pageable).getContent();
-        }
+        Predicate predicate = createAdminPredicate(users, states, categories, rangeStart, rangeEnd);
+        List<Event> events = (predicate == null) ? eventRepository.findAll(pageable).getContent()
+                : eventRepository.findAll(predicate, pageable).getContent();
         return eventMapper.toEvenDtoList(events);
     }
 
@@ -152,10 +138,10 @@ public class EventServiceImpl implements EventService {
     public EventDto publishEvent(Long eventId) {
         log.info("Publishing event by admin, eventId={}", eventId);
         Event event = eventMapper.toEvent(getEventById(eventId));
-        if (event.getEventDate().isAfter(LocalDateTime.now().withNano(0).plusHours(1))
+        if (event.getEventDate().isAfter(LOCAL_DATE_TIME_NOW.plusHours(1))
                 && event.getState().equals(State.PENDING)) {
             event.setState(State.PUBLISHED);
-            event.setPublishedOn(LocalDateTime.now().withNano(0));
+            event.setPublishedOn(LOCAL_DATE_TIME_NOW);
             return eventMapper.toEventDto(eventRepository.save(event));
         } else {
             throw new ValidationException("Can't publish this event");
@@ -178,7 +164,8 @@ public class EventServiceImpl implements EventService {
     public List<EventShortDto> getEventsByUser(Long userId, Pageable pageable) {
         try {
             log.info("Getting events by userId={}", userId);
-            return eventMapper.toEventShortDtoList(eventRepository.findEventsByInitiator_Id(userId, pageable));
+            List<Event> eventsList = eventRepository.findEventsByInitiator_Id(userId, pageable);
+            return eventMapper.toEventShortDtoList(eventsList);
         } catch (NoSuchElementException e) {
             return new ArrayList<>();
         }
@@ -192,7 +179,7 @@ public class EventServiceImpl implements EventService {
         try {
             Event event = eventRepository.findEventByIdAndInitiator_Id(eventId, userId);
             if (event.getState().equals(State.PUBLISHED)
-                    || event.getEventDate().isBefore(LocalDateTime.now().withNano(0).plusHours(2)))
+                    || event.getEventDate().isBefore(LOCAL_DATE_TIME_NOW.plusHours(2)))
                 throw new ValidationException("Wrong state or eventDate");
             if (event.getState().equals(State.CANCELED)) event.setState(State.PENDING);
             Event updatedEvent = eventMapper.updateEventByUser(updateEventDto, event);
@@ -212,11 +199,11 @@ public class EventServiceImpl implements EventService {
         User user = userMapper.toUser(userService.getUserById(userId));
         Event event = eventMapper.fromNewEvent(newEventDto);
         Category category = categoryMapper.toCategory(categoryService.getCategoryById(newEventDto.getCategory()));
-        if (event.getEventDate().isBefore(LocalDateTime.now().withNano(0).plusHours(2)))
+        if (event.getEventDate().isBefore(LOCAL_DATE_TIME_NOW.plusHours(2)))
             throw new ValidationException("Wrong eventDate");
         event.setInitiator(user);
         event.setCategory(category);
-        event.setCreatedOn(LocalDateTime.now().withNano(0));
+        event.setCreatedOn(LOCAL_DATE_TIME_NOW);
         event.setConfirmedRequests(0L);
         event.setViews(0L);
         event.setState(State.PENDING);
@@ -227,7 +214,8 @@ public class EventServiceImpl implements EventService {
     public EventDto getUserEvent(Long userId, Long eventId) {
         try {
             log.info("Getting user event by eventId={}, userId={}", eventId, userId);
-            return eventMapper.toEventDto(eventRepository.findEventByIdAndInitiator_Id(eventId, userId));
+            Event event = eventRepository.findEventByIdAndInitiator_Id(eventId, userId);
+            return eventMapper.toEventDto(event);
         } catch (NoSuchElementException e) {
             throw new NoSuchElementException(String.format("Event with id %s is not found", eventId));
         }
@@ -265,5 +253,16 @@ public class EventServiceImpl implements EventService {
         Long approved = event.getConfirmedRequests();
         event.setConfirmedRequests(--approved);
         eventRepository.save(event);
+    }
+
+    private void postHitToStatsServer(HttpServletRequest request) {
+        try {
+            hitClient.postHit(
+                    new Hit(request.getServerName(), request.getRequestURI(), request.getRemoteAddr(),
+                            LocalDateTime.now().format(DATE_TIME_FORMATTER))
+            );
+        } catch (WebClientRequestException e) {
+            log.warn("Hit not saved because: {}", e.getCause().getMessage());
+        }
     }
 }

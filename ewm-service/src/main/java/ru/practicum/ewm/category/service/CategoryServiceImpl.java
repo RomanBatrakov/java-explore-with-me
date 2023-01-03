@@ -15,7 +15,10 @@ import ru.practicum.ewm.event.service.EventService;
 import ru.practicum.ewm.exeption.ValidationException;
 
 import javax.transaction.Transactional;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -45,7 +48,6 @@ public class CategoryServiceImpl implements CategoryService {
         }
     }
 
-    //TODO: разобраться, почему не отлавливает ошибку
     @Override
     public CategoryDto updateCategory(CategoryDto categoryDto) {
         log.info("Updating category: {}", categoryDto);

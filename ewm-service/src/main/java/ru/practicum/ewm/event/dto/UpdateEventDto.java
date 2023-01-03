@@ -2,14 +2,11 @@ package ru.practicum.ewm.event.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
-import org.hibernate.validator.constraints.ScriptAssert;
 import org.springframework.format.annotation.DateTimeFormat;
-import ru.practicum.ewm.category.dto.CategoryDto;
-import ru.practicum.ewm.event.model.State;
-import ru.practicum.ewm.location.dto.LocationDto;
-import ru.practicum.ewm.user.dto.UserShortDto;
 
-import javax.validation.constraints.*;
+import javax.validation.constraints.Future;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 
 @Getter
@@ -17,21 +14,20 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-//@ScriptAssert(lang = "javascript", script = "_this.eventDate.before(LocalDateTime.now().plusHours(2))")
 public class UpdateEventDto {
-    @NotNull
+    @NotNull(message = "eventId is null")
     private Long eventId;
-    @Size(min=20, max=2000)
+    @Size(min = 20, max = 2000)
     private String annotation;
     private Long category;
-    @Size(min=20, max=7000)
+    @Size(min = 20, max = 7000)
     private String description;
-    @Future
+    @Future(message = "eventDate is not future")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime eventDate;
     private Boolean paid;
     private Long participantLimit;
-    @Size(min=3, max=120)
+    @Size(min = 3, max = 120)
     private String title;
 }

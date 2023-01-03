@@ -29,14 +29,15 @@ public class PrivateEventController {
     private static final String EVENT_ID_PATH_VARIABLE_KEY = "eventId";
     private static final String USER_ID_PATH_VARIABLE_KEY = "userId";
     private static final String REQUEST_ID_PATH_VARIABLE_KEY = "reqId";
-
     private final EventService eventService;
     private final RequestService requestService;
 
     @GetMapping
     public ResponseEntity<List<EventShortDto>> getEventsByUser(@PathVariable(USER_ID_PATH_VARIABLE_KEY) Long userId,
-                                                               @RequestParam(required = false, defaultValue = "0") @PositiveOrZero int from,
-                                                               @RequestParam(required = false, defaultValue = "10") @Positive int size) {
+                                                               @RequestParam(required = false, defaultValue = "0")
+                                                               @PositiveOrZero int from,
+                                                               @RequestParam(required = false, defaultValue = "10")
+                                                               @Positive int size) {
         log.info("GET request for path /users/{userId}/events with userId={}", userId);
         return ResponseEntity.ok(eventService.getEventsByUser(userId, PageRequest.of(from, size)));
     }
@@ -96,5 +97,4 @@ public class PrivateEventController {
         return ResponseEntity.ok(requestService
                 .changeRequestStatus(userId, eventId, requestId, RequestStatus.REJECTED));
     }
-
 }

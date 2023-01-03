@@ -1,7 +1,6 @@
 package ru.practicum.ewm.event.model;
 
 import lombok.*;
-import org.springframework.format.annotation.DateTimeFormat;
 import ru.practicum.ewm.category.model.Category;
 import ru.practicum.ewm.compilation.model.Compilation;
 import ru.practicum.ewm.location.model.Location;
@@ -22,7 +21,7 @@ public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "annotation", length=2000)
+    @Column(name = "annotation", length = 2000)
     private String annotation;
     @ManyToOne
     @JoinColumn(name = "category_id", referencedColumnName = "id")
@@ -31,7 +30,7 @@ public class Event {
     private Long confirmedRequests;
     @Column(name = "created_on")
     private LocalDateTime createdOn;
-    @Column(name = "description", length=7000)
+    @Column(name = "description", length = 7000)
     private String description;
     @Column(name = "event_date")
     private LocalDateTime eventDate;

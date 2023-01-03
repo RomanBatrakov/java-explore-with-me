@@ -9,8 +9,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.event.dto.AdminUpdateEventDto;
 import ru.practicum.ewm.event.dto.EventDto;
-import ru.practicum.ewm.event.service.EventService;
 import ru.practicum.ewm.event.model.State;
+import ru.practicum.ewm.event.service.EventService;
 
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
@@ -53,6 +53,7 @@ public class AdminEventController {
         log.info("PATCH request for path /admin/events/{eventId}/publish with eventId={}", id);
         return ResponseEntity.ok(eventService.publishEvent(id));
     }
+
     @PatchMapping("/{eventId}/reject")
     public ResponseEntity<EventDto> rejectEvent(@PathVariable(EVENT_ID_PATH_VARIABLE_KEY) Long id) {
         log.info("PATCH request for path /admin/events/{eventId}/reject with eventId={}", id);

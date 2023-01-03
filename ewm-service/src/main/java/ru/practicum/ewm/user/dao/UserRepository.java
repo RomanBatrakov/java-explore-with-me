@@ -7,6 +7,7 @@ import ru.practicum.ewm.user.model.User;
 
 import java.util.List;
 import java.util.Set;
+
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findUsersByIdIn(Set<Long> ids, Pageable pageable);

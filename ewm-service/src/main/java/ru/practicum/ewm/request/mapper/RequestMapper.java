@@ -1,6 +1,8 @@
 package ru.practicum.ewm.request.mapper;
 
-import org.mapstruct.*;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.ReportingPolicy;
 import ru.practicum.ewm.request.dto.RequestDto;
 import ru.practicum.ewm.request.model.Request;
 

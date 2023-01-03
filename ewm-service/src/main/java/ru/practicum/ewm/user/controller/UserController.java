@@ -3,6 +3,7 @@ package ru.practicum.ewm.user.controller;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +23,7 @@ import java.util.Set;
 @AllArgsConstructor
 public class UserController {
     private final UserService userService;
+
     @GetMapping
     public ResponseEntity<List<UserDto>> getUsersByIds(@RequestParam(required = false) Set<Long> ids,
                                                        @RequestParam(required = false, defaultValue = "0")
@@ -39,8 +41,9 @@ public class UserController {
     }
 
     @DeleteMapping("/{userId}")
-    public void deleteUser(@PathVariable("userId") Long id) {
+    public ResponseEntity<Object> deleteUser(@PathVariable("userId") Long id) {
         log.info("DELETE request for path /admin/users/{userId} with userId={}", id);
         userService.deleteUser(id);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }
