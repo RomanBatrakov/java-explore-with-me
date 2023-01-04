@@ -1,6 +1,7 @@
 package ru.practicum.ewm.hit.client;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -11,6 +12,8 @@ import ru.practicum.ewm.hit.model.Hit;
 @Slf4j
 @RestController
 public class HitClient {
+    @Value("${stats-server.url}")
+    private String hitPostPath;
     private final WebClient client;
 
     public HitClient() {
@@ -19,7 +22,7 @@ public class HitClient {
 
     public void postHit(Hit hit) throws WebClientRequestException {
         log.info("Sending hit to stats service:{}", hit);
-        String hitPostUrl = "http://localhost:9090/hit";
+        String hitPostUrl = hitPostPath + "/hit";
         client.post()
                 .uri(hitPostUrl)
                 .bodyValue(hit)
