@@ -1,6 +1,6 @@
 package ru.practicum.ewm.event.controller;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -22,7 +22,7 @@ import java.util.List;
 @Validated
 @RestController
 @RequestMapping(path = "/events")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class PublicEventController {
     private final String sortValidation = "^VIEWS$|^EVENT_DATE$";
     private final EventService eventService;

@@ -1,6 +1,6 @@
 package ru.practicum.ewm.request.service;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.event.dto.EventDto;
@@ -30,7 +30,7 @@ import static ru.practicum.ewm.request.model.RequestStatus.*;
 @Slf4j
 @Service
 @Transactional
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class RequestServiceImpl implements RequestService {
     private final RequestRepository requestRepository;
     private final RequestMapper requestMapper;

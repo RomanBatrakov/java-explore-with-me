@@ -1,6 +1,6 @@
 package ru.practicum.ewm.compilation.controller;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +18,7 @@ import java.util.List;
 @Validated
 @RestController
 @RequestMapping(path = "/compilations")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class PublicCompilationController {
     private final CompilationService compilationService;
 

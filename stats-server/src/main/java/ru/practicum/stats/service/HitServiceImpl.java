@@ -1,7 +1,7 @@
 package ru.practicum.stats.service;
 
 import com.querydsl.core.types.Predicate;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.stats.dao.HitRepository;
@@ -24,7 +24,7 @@ import static ru.practicum.stats.util.QPredicate.createPredicate;
 @Slf4j
 @Service
 @Transactional
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class HitServiceImpl implements HitService {
     private final HitRepository hitRepository;
     private final HitMapper hitMapper;

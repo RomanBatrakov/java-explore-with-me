@@ -1,6 +1,6 @@
 package ru.practicum.ewm.event.controller;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -21,7 +21,7 @@ import java.util.List;
 @Validated
 @RestController
 @RequestMapping(path = "/admin/events")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class AdminEventController {
     private static final String EVENT_ID_PATH_VARIABLE_KEY = "eventId";
     private final EventService eventService;

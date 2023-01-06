@@ -1,6 +1,6 @@
 package ru.practicum.ewm.request.controller;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,7 +12,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping(path = "/users/{userId}/requests")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class RequestController {
     private final RequestService requestService;
 

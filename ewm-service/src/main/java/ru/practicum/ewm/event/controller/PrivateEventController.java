@@ -1,6 +1,6 @@
 package ru.practicum.ewm.event.controller;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +24,7 @@ import java.util.List;
 @Validated
 @RestController
 @RequestMapping(path = "/users/{userId}/events")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class PrivateEventController {
     private static final String EVENT_ID_PATH_VARIABLE_KEY = "eventId";
     private static final String USER_ID_PATH_VARIABLE_KEY = "userId";

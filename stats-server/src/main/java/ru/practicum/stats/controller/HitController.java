@@ -1,10 +1,9 @@
 package ru.practicum.stats.controller;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.stats.dto.HitDto;
 import ru.practicum.stats.model.Stats;
@@ -15,10 +14,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
-@Validated
 @RestController
 @RequestMapping
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class HitController {
     private final HitService hitService;
 
