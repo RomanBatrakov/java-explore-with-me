@@ -52,8 +52,7 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryDto updateCategory(CategoryDto categoryDto) {
         log.info("Updating category: {}", categoryDto);
         Category category = categoryMapper.toCategory(getCategoryById(categoryDto.getId()));
-        Optional<Category> x = categoryRepository.findCategoriesByName(categoryDto.getName());
-        if (x.isPresent())
+        if (categoryRepository.existsCategoriesByName(categoryDto.getName()))
             throw new ValidationException(String.format("Category name %s is already exist", categoryDto.getName()));
         category.setName(categoryDto.getName());
         return categoryMapper.toCategoryDto(categoryRepository.save(category));

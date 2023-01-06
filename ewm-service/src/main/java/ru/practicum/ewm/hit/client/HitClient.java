@@ -3,14 +3,14 @@ package ru.practicum.ewm.hit.client;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientRequestException;
 import reactor.core.publisher.Mono;
 import ru.practicum.ewm.hit.model.Hit;
 
 @Slf4j
-@RestController
+@Component
 public class HitClient {
     @Value("${stats-server.url}")
     private String hitPostPath;

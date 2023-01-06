@@ -19,7 +19,7 @@ public interface EventMapper {
 
     List<EventShortDto> toEventShortDtoList(List<Event> events);
 
-    List<EventDto> toEvenDtoList(List<Event> events);
+    List<EventDto> toEventDtoList(List<Event> events);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "category", ignore = true)

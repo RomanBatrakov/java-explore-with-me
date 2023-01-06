@@ -118,7 +118,7 @@ public class EventServiceImpl implements EventService {
         Predicate predicate = createAdminPredicate(users, states, categories, rangeStart, rangeEnd);
         List<Event> events = (predicate == null) ? eventRepository.findAll(pageable).getContent()
                 : eventRepository.findAll(predicate, pageable).getContent();
-        return eventMapper.toEvenDtoList(events);
+        return eventMapper.toEventDtoList(events);
     }
 
     @Override
