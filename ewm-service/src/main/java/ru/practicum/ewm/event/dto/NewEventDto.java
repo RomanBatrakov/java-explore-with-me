@@ -6,6 +6,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import ru.practicum.ewm.location.dto.LocationDto;
 
 import javax.validation.constraints.Future;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
@@ -16,12 +17,12 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class NewEventDto {
-    @NotNull(message = "annotation is null")
+    @NotBlank(message = "annotation is mandatory")
     @Size(min = 20, max = 2000)
     private String annotation;
     @NotNull(message = "category is null")
     private Long category;
-    @NotNull(message = "description is null")
+    @NotBlank(message = "description is mandatory")
     @Size(min = 20, max = 7000)
     private String description;
     @NotNull

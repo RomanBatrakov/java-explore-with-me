@@ -22,8 +22,14 @@
         <mapstruct.version>1.5.3.Final</mapstruct.version>
         <postgreSQL.version>42.5.1</postgreSQL.version>
         <checkstyle.version>3.2.0</checkstyle.version>
+        <puppycrawl-checkstyle.version>10.5.0</puppycrawl-checkstyle.version>
+        <maven-checkstyle-plugin.version>3.1.2</maven-checkstyle-plugin.version>
         <apt-maven-plugin.version>1.1.3</apt-maven-plugin.version>
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
+        <spotbugs-maven-plugin.version>4.7.0.0</spotbugs-maven-plugin.version>
+        <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
+        <spotbugs-maven-plugin.version>4.7.3.0</spotbugs-maven-plugin.version>
+        <jacoco-maven-plugin.version>0.8.8</jacoco-maven-plugin.version>
     </properties>
 
     <modules>
@@ -40,7 +46,7 @@
         <dependency>
             <groupId>com.github.spotbugs</groupId>
             <artifactId>spotbugs-maven-plugin</artifactId>
-            <version>4.7.3.0</version>
+            <version>${spotbugs-maven-plugin.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -65,7 +71,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-checkstyle-plugin</artifactId>
-                    <version>3.1.2</version>
+                    <version>${maven-checkstyle-plugin.version.version}</version>
                     <configuration>
                         <configLocation>checkstyle.xml</configLocation>
                         <failOnViolation>true</failOnViolation>
@@ -84,14 +90,14 @@
                         <dependency>
                             <groupId>com.puppycrawl.tools</groupId>
                             <artifactId>checkstyle</artifactId>
-                            <version>10.5.0</version>
+                            <version>${puppycrawl-checkstyle.version}</version>
                         </dependency>
                     </dependencies>
                 </plugin>
                 <plugin>
                     <groupId>com.github.spotbugs</groupId>
                     <artifactId>spotbugs-maven-plugin</artifactId>
-                    <version>4.7.0.0</version>
+                    <version>${spotbugs-maven-plugin.version}</version>
                     <configuration>
                         <effort>Max</effort>
                         <threshold>High</threshold>
@@ -107,7 +113,7 @@
                 <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>0.8.8</version>
+                    <version>${jacoco-maven-plugin.version}</version>
                     <configuration>
                         <output>file</output>
                     </configuration>

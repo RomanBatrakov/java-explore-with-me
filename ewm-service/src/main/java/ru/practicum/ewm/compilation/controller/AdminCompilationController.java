@@ -13,7 +13,6 @@ import ru.practicum.ewm.compilation.service.CompilationService;
 import javax.validation.Valid;
 
 @Slf4j
-@Validated
 @RestController
 @RequestMapping(path = "/admin/compilations")
 @AllArgsConstructor

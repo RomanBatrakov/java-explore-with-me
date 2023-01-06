@@ -4,7 +4,6 @@ import lombok.*;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 @Getter
@@ -14,12 +13,10 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 public class LocationDto {
     private Long id;
-    @NotBlank(message = "lat is mandatory")
     @NotNull(message = "lat is null")
     @Min(value = -90, message = "lat cant be less than -90")
     @Max(value = 90, message = "lat cant be more than 90")
     private Float lat;
-    @NotBlank(message = "lon is mandatory")
     @NotNull(message = "lon is null")
     @Min(value = -180, message = "lat cant be less than -180")
     @Max(value = 180, message = "lat cant be more than 180")

@@ -14,7 +14,6 @@ import javax.validation.constraints.Size;
 public class UserShortDto {
     private Long id;
     @NotBlank(message = "Name is mandatory")
-    @NotNull(message = "Name is null")
     @Size(max = 50, message = "Name is to long")
     private String name;
 }

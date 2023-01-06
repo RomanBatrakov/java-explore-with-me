@@ -15,11 +15,9 @@ import javax.validation.constraints.Size;
 public class UserDto {
     private Long id;
     @NotBlank(message = "Name is mandatory")
-    @NotNull(message = "Name is null")
     @Size(max = 50, message = "Name is to long")
     private String name;
     @NotBlank(message = "Email is mandatory")
-    @NotNull(message = "Email is null")
     @Email(message = "Email is incorrect")
     private String email;
 }
