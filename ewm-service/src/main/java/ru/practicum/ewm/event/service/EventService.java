@@ -39,7 +39,6 @@ public interface EventService {
 
     EventDto cancelEventByUser(Long userId, Long eventId);
 
-    void addParticipant(Event event);
+    void checkParticipantLimit(Event event);
 
-    void deleteParticipant(Long eventId);
 }

@@ -19,10 +19,7 @@ import ru.practicum.ewm.user.service.UserService;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static ru.practicum.ewm.request.model.RequestStatus.*;
@@ -63,7 +60,7 @@ public class RequestServiceImpl implements RequestService {
                 .created(LocalDateTime.now().withNano(0))
                 .status(event.getRequestModeration() || event.getParticipantLimit() != 0 ? PENDING : CONFIRMED)
                 .build();
-        if (request.getStatus().equals(CONFIRMED)) eventService.addParticipant(event);
+        if (request.getStatus().equals(CONFIRMED)) eventService.checkParticipantLimit(event);
         return requestMapper.toRequestDto(requestRepository.save(request));
     }
 
@@ -74,8 +71,6 @@ public class RequestServiceImpl implements RequestService {
             Request request = requestRepository.findById(requestId).get();
             Long id = request.getRequester().getId();
             if (Objects.equals(userId, id)) {
-                if (request.getStatus().equals(CONFIRMED))
-                    eventService.deleteParticipant(request.getEvent().getId());
                 request.setStatus(CANCELED);
                 return requestMapper.toRequestDto(requestRepository.save(request));
             } else {
@@ -108,6 +103,7 @@ public class RequestServiceImpl implements RequestService {
             Request request = requestRepository.findById(requestId).get();
             if (userId.equals(event.getInitiator().getId()) && request.getEvent().getId().equals(event.getId())) {
                 request.setStatus(status);
+                if (status.equals(CONFIRMED)) eventService.checkParticipantLimit(event);
                 return requestMapper.toRequestDto(requestRepository.save(request));
             } else {
                 throw new ValidationException(String.format("User with id %s is not initiator or wrong event/request",
@@ -117,6 +113,7 @@ public class RequestServiceImpl implements RequestService {
             throw new NoSuchElementException(String.format("Request with id %s is not found", requestId));
         }
     }
+
 
     @Override
     public void rejectOtherRequests(Long eventId) {
@@ -140,5 +137,12 @@ public class RequestServiceImpl implements RequestService {
         } else if ((event.getParticipantLimit() != 0 && event.getParticipantLimit() <= event.getConfirmedRequests())) {
             throw new ValidationException("Event is full");
         }
+    }
+
+    @Override
+    public void setConfirmedRequestsFromDb(List<Event> events) {
+        requestRepository.findAllByEventInAndStatus(events, CONFIRMED).stream()
+                .collect(Collectors.groupingBy(Request::getEvent, Collectors.counting()))
+                .forEach(Event::setConfirmedRequests);
     }
 }

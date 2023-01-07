@@ -27,6 +27,7 @@ import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
@@ -72,6 +73,7 @@ public class EventServiceImpl implements EventService {
         Predicate predicate = createPublicPredicate(text, categories, paid, rangeStart, rangeEnd);
         List<Event> events = (predicate == null) ? eventRepository.findAll(pageable).getContent()
                 : eventRepository.findAll(predicate, pageable).getContent();
+        requestService.setConfirmedRequestsFromDb(events);
         if (onlyAvailable) {
             events = events.stream()
                     .filter(e -> (e.getParticipantLimit() != 0L)
@@ -87,6 +89,7 @@ public class EventServiceImpl implements EventService {
             log.info("Getting public event by id={}", eventId);
             postHitToStatsServer(request);
             Event event = eventRepository.findEventByIdAndState(eventId, State.PUBLISHED);
+            requestService.setConfirmedRequestsFromDb(Collections.singletonList(event));
             event.setViews(event.getViews() + 1);
             return eventMapper.toEventDto(event);
         } catch (NoSuchElementException e) {
@@ -98,7 +101,9 @@ public class EventServiceImpl implements EventService {
     public EventDto getEventById(Long eventId) {
         try {
             log.info("Getting event by id={}", eventId);
-            return eventMapper.toEventDto(eventRepository.findById(eventId).get());
+            Event event = eventRepository.findById(eventId).get();
+            requestService.setConfirmedRequestsFromDb(Collections.singletonList(event));
+            return eventMapper.toEventDto(event);
         } catch (NoSuchElementException e) {
             throw new NoSuchElementException(String.format("Event with id %s is not found", eventId));
         }
@@ -107,7 +112,9 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<Event> eventsIdsToEvents(List<Long> events) {
         log.info("Converting events ids: {} to events", events);
-        return eventRepository.findEventsByIdIn(events);
+        List<Event> eventList = eventRepository.findEventsByIdIn(events);
+        requestService.setConfirmedRequestsFromDb(eventList);
+        return eventList;
     }
 
     @Override
@@ -118,9 +125,11 @@ public class EventServiceImpl implements EventService {
         Predicate predicate = createAdminPredicate(users, states, categories, rangeStart, rangeEnd);
         List<Event> events = (predicate == null) ? eventRepository.findAll(pageable).getContent()
                 : eventRepository.findAll(predicate, pageable).getContent();
+        requestService.setConfirmedRequestsFromDb(events);
         return eventMapper.toEventDtoList(events);
     }
 
+    //TODO: проверить этот метод
     @Override
     public EventDto updateEventByAdmin(Long eventId, AdminUpdateEventDto adminUpdateEventDto) {
         log.info("Updating event by admin, eventId={}", eventId);
@@ -134,6 +143,7 @@ public class EventServiceImpl implements EventService {
         return eventMapper.toEventDto(eventRepository.save(updatedEvent));
     }
 
+    //TODO: проверить этот метод
     @Override
     public EventDto publishEvent(Long eventId) {
         log.info("Publishing event by admin, eventId={}", eventId);
@@ -148,6 +158,7 @@ public class EventServiceImpl implements EventService {
         }
     }
 
+    //TODO: проверить этот метод
     @Override
     public EventDto rejectEvent(Long eventId) {
         log.info("Canceling event by admin, eventId={}", eventId);
@@ -164,13 +175,15 @@ public class EventServiceImpl implements EventService {
     public List<EventShortDto> getEventsByUser(Long userId, Pageable pageable) {
         try {
             log.info("Getting events by userId={}", userId);
-            List<Event> eventsList = eventRepository.findEventsByInitiator_Id(userId, pageable);
-            return eventMapper.toEventShortDtoList(eventsList);
+            List<Event> eventList = eventRepository.findEventsByInitiator_Id(userId, pageable);
+            requestService.setConfirmedRequestsFromDb(eventList);
+            return eventMapper.toEventShortDtoList(eventList);
         } catch (NoSuchElementException e) {
             return new ArrayList<>();
         }
     }
 
+    //TODO: проверить этот метод
     @Override
     public EventDto updateEventByUser(Long userId, UpdateEventDto updateEventDto) {
         log.info("Updating event by user: userId={}", userId);
@@ -187,12 +200,14 @@ public class EventServiceImpl implements EventService {
                 Category category = categoryMapper.toCategory(categoryService.getCategoryById(catId));
                 updatedEvent.setCategory(category);
             }
+            requestService.setConfirmedRequestsFromDb(Collections.singletonList(updatedEvent));
             return eventMapper.toEventDto(eventRepository.save(updatedEvent));
         } catch (NoSuchElementException e) {
             throw new NoSuchElementException(String.format("Event with id %s is not found", eventId));
         }
     }
 
+    //TODO: проверить этот метод
     @Override
     public EventDto createEventByUser(NewEventDto newEventDto, Long userId) {
         log.info("Creating event by user: userId={}", userId);
@@ -215,12 +230,14 @@ public class EventServiceImpl implements EventService {
         try {
             log.info("Getting user event by eventId={}, userId={}", eventId, userId);
             Event event = eventRepository.findEventByIdAndInitiator_Id(eventId, userId);
+            requestService.setConfirmedRequestsFromDb(Collections.singletonList(event));
             return eventMapper.toEventDto(event);
         } catch (NoSuchElementException e) {
             throw new NoSuchElementException(String.format("Event with id %s is not found", eventId));
         }
     }
 
+    //TODO: проверить этот метод
     @Override
     public EventDto cancelEventByUser(Long userId, Long eventId) {
         try {
@@ -228,6 +245,7 @@ public class EventServiceImpl implements EventService {
             Event event = eventRepository.findEventByIdAndInitiator_Id(eventId, userId);
             if (event.getState().equals(State.PENDING)) {
                 event.setState(State.CANCELED);
+                requestService.setConfirmedRequestsFromDb(Collections.singletonList(event));
                 return eventMapper.toEventDto(eventRepository.save(event));
             } else {
                 throw new ValidationException("Wrong event state");
@@ -238,21 +256,10 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public void addParticipant(Event event) {
-        log.info("Add participant to event={}", event);
-        Long approved = event.getConfirmedRequests();
-        event.setConfirmedRequests(++approved);
-        eventRepository.save(event);
-        if (event.getParticipantLimit() <= approved) requestService.rejectOtherRequests(event.getId());
-    }
-
-    @Override
-    public void deleteParticipant(Long eventId) {
-        log.info("Delete participant from event, eventId={}", eventId);
-        Event event = eventMapper.toEvent(getEventById(eventId));
-        Long approved = event.getConfirmedRequests();
-        event.setConfirmedRequests(--approved);
-        eventRepository.save(event);
+    public void checkParticipantLimit(Event event) {
+        log.info("Check participant to event={}", event);
+        if (event.getParticipantLimit() <= event.getConfirmedRequests())
+            requestService.rejectOtherRequests(event.getId());
     }
 
     private void postHitToStatsServer(HttpServletRequest request) {
