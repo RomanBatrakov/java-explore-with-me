@@ -129,7 +129,6 @@ public class EventServiceImpl implements EventService {
         return eventMapper.toEventDtoList(events);
     }
 
-    //TODO: проверить этот метод
     @Override
     public EventDto updateEventByAdmin(Long eventId, AdminUpdateEventDto adminUpdateEventDto) {
         log.info("Updating event by admin, eventId={}", eventId);
@@ -143,7 +142,6 @@ public class EventServiceImpl implements EventService {
         return eventMapper.toEventDto(eventRepository.save(updatedEvent));
     }
 
-    //TODO: проверить этот метод
     @Override
     public EventDto publishEvent(Long eventId) {
         log.info("Publishing event by admin, eventId={}", eventId);
@@ -158,7 +156,6 @@ public class EventServiceImpl implements EventService {
         }
     }
 
-    //TODO: проверить этот метод
     @Override
     public EventDto rejectEvent(Long eventId) {
         log.info("Canceling event by admin, eventId={}", eventId);
@@ -183,7 +180,6 @@ public class EventServiceImpl implements EventService {
         }
     }
 
-    //TODO: проверить этот метод
     @Override
     public EventDto updateEventByUser(Long userId, UpdateEventDto updateEventDto) {
         log.info("Updating event by user: userId={}", userId);
@@ -207,7 +203,6 @@ public class EventServiceImpl implements EventService {
         }
     }
 
-    //TODO: проверить этот метод
     @Override
     public EventDto createEventByUser(NewEventDto newEventDto, Long userId) {
         log.info("Creating event by user: userId={}", userId);
@@ -237,7 +232,6 @@ public class EventServiceImpl implements EventService {
         }
     }
 
-    //TODO: проверить этот метод
     @Override
     public EventDto cancelEventByUser(Long userId, Long eventId) {
         try {

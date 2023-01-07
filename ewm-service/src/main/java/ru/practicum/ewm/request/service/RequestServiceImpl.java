@@ -141,8 +141,11 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public void setConfirmedRequestsFromDb(List<Event> events) {
-        requestRepository.findAllByEventInAndStatus(events, CONFIRMED).stream()
-                .collect(Collectors.groupingBy(Request::getEvent, Collectors.counting()))
-                .forEach(Event::setConfirmedRequests);
+        Map<Event, Long> confirmedRequestsCountByEvent = requestRepository.findAllByEventInAndStatus(events, CONFIRMED)
+                .stream()
+                .collect(Collectors.groupingBy(Request::getEvent, Collectors.counting()));
+
+        events.forEach(event -> event.setConfirmedRequests(
+                confirmedRequestsCountByEvent.getOrDefault(event, 0L)));
     }
 }
