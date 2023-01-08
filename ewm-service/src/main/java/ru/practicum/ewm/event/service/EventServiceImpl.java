@@ -17,6 +17,7 @@ import ru.practicum.ewm.event.model.State;
 import ru.practicum.ewm.exeption.ValidationException;
 import ru.practicum.ewm.hit.client.HitClient;
 import ru.practicum.ewm.hit.model.Hit;
+import ru.practicum.ewm.hit.model.Stats;
 import ru.practicum.ewm.request.service.RequestService;
 import ru.practicum.ewm.user.mapper.UserMapper;
 import ru.practicum.ewm.user.model.User;
@@ -24,12 +25,11 @@ import ru.practicum.ewm.user.service.UserService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static ru.practicum.ewm.util.QPredicates.createAdminPredicate;
@@ -69,7 +69,6 @@ public class EventServiceImpl implements EventService {
                                                   Boolean onlyAvailable, String sort, Pageable pageable,
                                                   HttpServletRequest request) {
         log.info("Getting all public events with filters");
-        postHitToStatsServer(request);
         Predicate predicate = createPublicPredicate(text, categories, paid, rangeStart, rangeEnd);
         List<Event> events = (predicate == null) ? eventRepository.findAll(pageable).getContent()
                 : eventRepository.findAll(predicate, pageable).getContent();
@@ -80,6 +79,8 @@ public class EventServiceImpl implements EventService {
                             && (e.getParticipantLimit() > e.getConfirmedRequests()))
                     .collect(Collectors.toList());
         }
+        postHitToStatsServer(request);
+        addViewsToEvents(events);
         return eventMapper.toEventShortDtoList(events);
     }
 
@@ -87,10 +88,10 @@ public class EventServiceImpl implements EventService {
     public EventDto getPublicEventById(Long eventId, HttpServletRequest request) {
         try {
             log.info("Getting public event by id={}", eventId);
-            postHitToStatsServer(request);
             Event event = eventRepository.findEventByIdAndState(eventId, State.PUBLISHED);
             requestService.setConfirmedRequestsFromDb(Collections.singletonList(event));
-            event.setViews(event.getViews() + 1);
+            addViewsToEvents(Collections.singletonList(event));
+            postHitToStatsServer(request);
             return eventMapper.toEventDto(event);
         } catch (NoSuchElementException e) {
             throw new NoSuchElementException(String.format("Event with id %s is not found", eventId));
@@ -103,6 +104,7 @@ public class EventServiceImpl implements EventService {
             log.info("Getting event by id={}", eventId);
             Event event = eventRepository.findById(eventId).get();
             requestService.setConfirmedRequestsFromDb(Collections.singletonList(event));
+            addViewsToEvents(Collections.singletonList(event));
             return eventMapper.toEventDto(event);
         } catch (NoSuchElementException e) {
             throw new NoSuchElementException(String.format("Event with id %s is not found", eventId));
@@ -114,6 +116,7 @@ public class EventServiceImpl implements EventService {
         log.info("Converting events ids: {} to events", events);
         List<Event> eventList = eventRepository.findEventsByIdIn(events);
         requestService.setConfirmedRequestsFromDb(eventList);
+        addViewsToEvents(eventList);
         return eventList;
     }
 
@@ -126,6 +129,7 @@ public class EventServiceImpl implements EventService {
         List<Event> events = (predicate == null) ? eventRepository.findAll(pageable).getContent()
                 : eventRepository.findAll(predicate, pageable).getContent();
         requestService.setConfirmedRequestsFromDb(events);
+        addViewsToEvents(events);
         return eventMapper.toEventDtoList(events);
     }
 
@@ -174,6 +178,7 @@ public class EventServiceImpl implements EventService {
             log.info("Getting events by userId={}", userId);
             List<Event> eventList = eventRepository.findEventsByInitiator_Id(userId, pageable);
             requestService.setConfirmedRequestsFromDb(eventList);
+            addViewsToEvents(eventList);
             return eventMapper.toEventShortDtoList(eventList);
         } catch (NoSuchElementException e) {
             return new ArrayList<>();
@@ -197,6 +202,7 @@ public class EventServiceImpl implements EventService {
                 updatedEvent.setCategory(category);
             }
             requestService.setConfirmedRequestsFromDb(Collections.singletonList(updatedEvent));
+            addViewsToEvents(Collections.singletonList(updatedEvent));
             return eventMapper.toEventDto(eventRepository.save(updatedEvent));
         } catch (NoSuchElementException e) {
             throw new NoSuchElementException(String.format("Event with id %s is not found", eventId));
@@ -226,6 +232,7 @@ public class EventServiceImpl implements EventService {
             log.info("Getting user event by eventId={}, userId={}", eventId, userId);
             Event event = eventRepository.findEventByIdAndInitiator_Id(eventId, userId);
             requestService.setConfirmedRequestsFromDb(Collections.singletonList(event));
+            addViewsToEvents(Collections.singletonList(event));
             return eventMapper.toEventDto(event);
         } catch (NoSuchElementException e) {
             throw new NoSuchElementException(String.format("Event with id %s is not found", eventId));
@@ -240,6 +247,7 @@ public class EventServiceImpl implements EventService {
             if (event.getState().equals(State.PENDING)) {
                 event.setState(State.CANCELED);
                 requestService.setConfirmedRequestsFromDb(Collections.singletonList(event));
+                addViewsToEvents(Collections.singletonList(event));
                 return eventMapper.toEventDto(eventRepository.save(event));
             } else {
                 throw new ValidationException("Wrong event state");
@@ -265,5 +273,17 @@ public class EventServiceImpl implements EventService {
         } catch (WebClientRequestException e) {
             log.warn("Hit not saved because: {}", e.getCause().getMessage());
         }
+    }
+
+    @Override
+    public void addViewsToEvents(List<Event> events) {
+        List<String> eventsUrl = events.stream()
+                .map(Event::getId)
+                .map(id -> URLEncoder.encode("/events/" + id, StandardCharsets.UTF_8))
+                .collect(Collectors.toList());
+        List<Stats> statsList = hitClient.findStats(LOCAL_DATE_TIME_NOW.minusYears(3), LOCAL_DATE_TIME_NOW.plusYears(10), eventsUrl, false);
+        Map<String, Long> statMap = statsList.stream()
+                .collect(Collectors.toMap(Stats::getUri, Stats::getHits));
+        events.forEach(event -> event.setViews(statMap.getOrDefault("/events/" + event.getId(), 0L)));
     }
 }

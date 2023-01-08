@@ -144,7 +144,6 @@ public class RequestServiceImpl implements RequestService {
         Map<Event, Long> confirmedRequestsCountByEvent = requestRepository.findAllByEventInAndStatus(events, CONFIRMED)
                 .stream()
                 .collect(Collectors.groupingBy(Request::getEvent, Collectors.counting()));
-
         events.forEach(event -> event.setConfirmedRequests(
                 confirmedRequestsCountByEvent.getOrDefault(event, 0L)));
     }

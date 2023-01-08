@@ -52,7 +52,7 @@ public class Event {
     private State state;
     @Column(name = "title")
     private String title;
-    @Column(name = "views")
+    @Transient
     private Long views;
     @ManyToMany(mappedBy = "events")
     private List<Compilation> compilations;

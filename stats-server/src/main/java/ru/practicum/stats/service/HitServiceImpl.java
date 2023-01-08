@@ -41,6 +41,7 @@ public class HitServiceImpl implements HitService {
         log.info("Getting stats with filters");
         List<String> urisList = new ArrayList<>();
         for (String u : uris) {
+            u = u.replace("[", "").replace("]", "");
             urisList.add(URLDecoder.decode(u, StandardCharsets.UTF_8));
         }
         Predicate predicate = createPredicate(urisList, start, end);

@@ -48,7 +48,6 @@ CREATE TABLE IF NOT EXISTS events
     request_moderation BIGINT                                  NOT NULL,
     state              VARCHAR(255)                            NOT NULL,
     title              VARCHAR(120)                            NOT NULL,
-    views              BIGINT                                  NOT NULL,
     CONSTRAINT pk_event PRIMARY KEY (id),
     CONSTRAINT fk_events_to_users FOREIGN KEY (initiator_id) REFERENCES users (id) ON DELETE CASCADE,
     CONSTRAINT fk_events_to_locations FOREIGN KEY (location_id) REFERENCES locations (id) ON DELETE CASCADE,

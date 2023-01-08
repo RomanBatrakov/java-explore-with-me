@@ -41,4 +41,5 @@ public interface EventService {
 
     void checkParticipantLimit(Event event);
 
+    void addViewsToEvents(List<Event> events);
 }
