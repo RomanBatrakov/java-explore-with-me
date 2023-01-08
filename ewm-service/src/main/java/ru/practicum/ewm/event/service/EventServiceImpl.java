@@ -286,4 +286,9 @@ public class EventServiceImpl implements EventService {
                 .collect(Collectors.toMap(Stats::getUri, Stats::getHits));
         events.forEach(event -> event.setViews(statMap.getOrDefault("/events/" + event.getId(), 0L)));
     }
+
+    @Override
+    public Boolean existsByCategoryId(Long id) {
+        return eventRepository.existsEventsByCategory_Id(id);
+    }
 }

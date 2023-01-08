@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.category.dao.CategoryRepository;
@@ -15,7 +14,6 @@ import ru.practicum.ewm.event.service.EventService;
 import ru.practicum.ewm.exeption.ValidationException;
 
 import javax.transaction.Transactional;
-import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
@@ -71,9 +69,8 @@ public class CategoryServiceImpl implements CategoryService {
     public void deleteCategory(Long id) {
         try {
             log.info("Deleting category with id={}", id);
-            int size = eventService.getAllEventsByFilter(null, null, Collections.singletonList(id),
-                    null, null, PageRequest.of(0, 10)).size();
-            if (size > 0) throw new ValidationException(String.format("Category with id %s have events", id));
+            Boolean haveEvent = eventService.existsByCategoryId(id);
+            if (haveEvent) throw new ValidationException(String.format("Category with id %s have events", id));
             categoryRepository.deleteById(id);
         } catch (EmptyResultDataAccessException e) {
             throw new NoSuchElementException(String.format("Category with id %s is not found", id));
