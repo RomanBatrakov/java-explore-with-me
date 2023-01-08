@@ -2,8 +2,6 @@ package ru.practicum.ewm.category.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.category.dto.CategoryDto;
 import ru.practicum.ewm.category.service.CategoryService;
@@ -18,21 +16,20 @@ public class AdminCategoryController {
     private final CategoryService categoryService;
 
     @PatchMapping
-    public ResponseEntity<CategoryDto> updateCategory(@RequestBody @Valid CategoryDto categoryDto) {
+    public CategoryDto updateCategory(@RequestBody @Valid CategoryDto categoryDto) {
         log.info("PATCH request for path /admin/categories with category: {}", categoryDto);
-        return ResponseEntity.ok(categoryService.updateCategory(categoryDto));
+        return categoryService.updateCategory(categoryDto);
     }
 
     @PostMapping
-    public ResponseEntity<CategoryDto> createCategory(@RequestBody @Valid CategoryDto categoryDto) {
+    public CategoryDto createCategory(@RequestBody @Valid CategoryDto categoryDto) {
         log.info("POST request for path /admin/categories with category: {}", categoryDto);
-        return ResponseEntity.ok(categoryService.createCategory(categoryDto));
+        return categoryService.createCategory(categoryDto);
     }
 
     @DeleteMapping("/{catId}")
-    public ResponseEntity<Object> deleteCategory(@PathVariable("catId") Long id) {
+    public void deleteCategory(@PathVariable("catId") Long id) {
         log.info("DELETE request for path /admin/categories/{catId} with catId={}", id);
         categoryService.deleteCategory(id);
-        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

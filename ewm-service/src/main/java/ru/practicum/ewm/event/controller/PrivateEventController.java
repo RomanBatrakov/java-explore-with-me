@@ -3,7 +3,6 @@ package ru.practicum.ewm.event.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.event.dto.EventDto;
@@ -33,68 +32,68 @@ public class PrivateEventController {
     private final RequestService requestService;
 
     @GetMapping
-    public ResponseEntity<List<EventShortDto>> getEventsByUser(@PathVariable(USER_ID_PATH_VARIABLE_KEY) Long userId,
-                                                               @RequestParam(required = false, defaultValue = "0")
-                                                               @PositiveOrZero int from,
-                                                               @RequestParam(required = false, defaultValue = "10")
-                                                               @Positive int size) {
+    public List<EventShortDto> getEventsByUser(@PathVariable(USER_ID_PATH_VARIABLE_KEY) Long userId,
+                                               @RequestParam(required = false, defaultValue = "0")
+                                               @PositiveOrZero int from,
+                                               @RequestParam(required = false, defaultValue = "10")
+                                               @Positive int size) {
         log.info("GET request for path /users/{userId}/events with userId={}", userId);
-        return ResponseEntity.ok(eventService.getEventsByUser(userId, PageRequest.of(from, size)));
+        return eventService.getEventsByUser(userId, PageRequest.of(from, size));
     }
 
     @PatchMapping
-    public ResponseEntity<EventDto> updateEventByUser(@PathVariable(USER_ID_PATH_VARIABLE_KEY) Long userId,
-                                                      @Valid @RequestBody UpdateEventDto updateEventDto) {
+    public EventDto updateEventByUser(@PathVariable(USER_ID_PATH_VARIABLE_KEY) Long userId,
+                                      @Valid @RequestBody UpdateEventDto updateEventDto) {
         log.info("PATCH request for path /users/{userId}/events with userId={}", userId);
-        return ResponseEntity.ok(eventService.updateEventByUser(userId, updateEventDto));
+        return eventService.updateEventByUser(userId, updateEventDto);
     }
 
     @PostMapping
-    public ResponseEntity<EventDto> createEventByUser(@PathVariable(USER_ID_PATH_VARIABLE_KEY) Long userId,
-                                                      @Valid @RequestBody NewEventDto newEventDto) {
+    public EventDto createEventByUser(@PathVariable(USER_ID_PATH_VARIABLE_KEY) Long userId,
+                                      @Valid @RequestBody NewEventDto newEventDto) {
         log.info("POST request for path /users/{userId}/events with userId={}", userId);
-        return ResponseEntity.ok(eventService.createEventByUser(newEventDto, userId));
+        return eventService.createEventByUser(newEventDto, userId);
     }
 
     @GetMapping("/{eventId}")
-    public ResponseEntity<EventDto> getUserEvent(@PathVariable(USER_ID_PATH_VARIABLE_KEY) Long userId,
-                                                 @PathVariable(EVENT_ID_PATH_VARIABLE_KEY) Long eventId) {
+    public EventDto getUserEvent(@PathVariable(USER_ID_PATH_VARIABLE_KEY) Long userId,
+                                 @PathVariable(EVENT_ID_PATH_VARIABLE_KEY) Long eventId) {
         log.info("GET request for path /users/{userId}/events/{eventId} with userId={}, eventId={}", userId, eventId);
-        return ResponseEntity.ok(eventService.getUserEvent(userId, eventId));
+        return eventService.getUserEvent(userId, eventId);
     }
 
     @PatchMapping("/{eventId}")
-    public ResponseEntity<EventDto> cancelEventByUser(@PathVariable(USER_ID_PATH_VARIABLE_KEY) Long userId,
-                                                      @PathVariable(EVENT_ID_PATH_VARIABLE_KEY) Long eventId) {
+    public EventDto cancelEventByUser(@PathVariable(USER_ID_PATH_VARIABLE_KEY) Long userId,
+                                      @PathVariable(EVENT_ID_PATH_VARIABLE_KEY) Long eventId) {
         log.info("PATCH request for path /users/{userId}/events/{eventId} with userId={}, eventId={}", userId, eventId);
-        return ResponseEntity.ok(eventService.cancelEventByUser(userId, eventId));
+        return eventService.cancelEventByUser(userId, eventId);
     }
 
     @GetMapping("/{eventId}/requests")
-    public ResponseEntity<List<RequestDto>> getUserRequests(@PathVariable(USER_ID_PATH_VARIABLE_KEY) Long userId,
-                                                            @PathVariable(EVENT_ID_PATH_VARIABLE_KEY) Long eventId) {
+    public List<RequestDto> getUserRequests(@PathVariable(USER_ID_PATH_VARIABLE_KEY) Long userId,
+                                            @PathVariable(EVENT_ID_PATH_VARIABLE_KEY) Long eventId) {
         log.info("GET request for path /users/{userId}/events/{eventId}/requests with userId={}, eventId={}",
                 userId, eventId);
-        return ResponseEntity.ok(requestService.getUserRequests(userId, eventId));
+        return requestService.getUserRequests(userId, eventId);
     }
 
     @PatchMapping("/{eventId}/requests/{reqId}/confirm")
-    public ResponseEntity<RequestDto> confirmRequest(@PathVariable(USER_ID_PATH_VARIABLE_KEY) Long userId,
-                                                     @PathVariable(EVENT_ID_PATH_VARIABLE_KEY) Long eventId,
-                                                     @PathVariable(REQUEST_ID_PATH_VARIABLE_KEY) Long requestId) {
+    public RequestDto confirmRequest(@PathVariable(USER_ID_PATH_VARIABLE_KEY) Long userId,
+                                     @PathVariable(EVENT_ID_PATH_VARIABLE_KEY) Long eventId,
+                                     @PathVariable(REQUEST_ID_PATH_VARIABLE_KEY) Long requestId) {
         log.info("PATCH request for path /users/{userId}/events/{eventId}/requests/{reqId}/confirm with userId={}," +
                 " eventId={}, reqId={}", userId, eventId, requestId);
-        return ResponseEntity.ok(requestService
-                .changeRequestStatus(userId, eventId, requestId, RequestStatus.CONFIRMED));
+        return requestService
+                .changeRequestStatus(userId, eventId, requestId, RequestStatus.CONFIRMED);
     }
 
     @PatchMapping("/{eventId}/requests/{reqId}/reject")
-    public ResponseEntity<RequestDto> rejectRequest(@PathVariable(USER_ID_PATH_VARIABLE_KEY) Long userId,
-                                                    @PathVariable(EVENT_ID_PATH_VARIABLE_KEY) Long eventId,
-                                                    @PathVariable(REQUEST_ID_PATH_VARIABLE_KEY) Long requestId) {
+    public RequestDto rejectRequest(@PathVariable(USER_ID_PATH_VARIABLE_KEY) Long userId,
+                                    @PathVariable(EVENT_ID_PATH_VARIABLE_KEY) Long eventId,
+                                    @PathVariable(REQUEST_ID_PATH_VARIABLE_KEY) Long requestId) {
         log.info("PATCH request for path /users/{userId}/events/{eventId}/requests/{reqId}/reject with userId={}," +
                 " eventId={}, reqId={}", userId, eventId, requestId);
-        return ResponseEntity.ok(requestService
-                .changeRequestStatus(userId, eventId, requestId, RequestStatus.REJECTED));
+        return requestService
+                .changeRequestStatus(userId, eventId, requestId, RequestStatus.REJECTED);
     }
 }

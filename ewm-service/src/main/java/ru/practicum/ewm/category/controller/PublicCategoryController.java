@@ -3,7 +3,6 @@ package ru.practicum.ewm.category.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.category.dto.CategoryDto;
@@ -22,17 +21,17 @@ public class PublicCategoryController {
     private final CategoryService categoryService;
 
     @GetMapping
-    public ResponseEntity<List<CategoryDto>> getAllCategories(@RequestParam(required = false, defaultValue = "0")
-                                                              @PositiveOrZero int from,
-                                                              @RequestParam(required = false, defaultValue = "10")
-                                                              @Positive int size) {
+    public List<CategoryDto> getAllCategories(@RequestParam(required = false, defaultValue = "0")
+                                              @PositiveOrZero int from,
+                                              @RequestParam(required = false, defaultValue = "10")
+                                              @Positive int size) {
         log.info("GET request for path /categories with from={}, size={}", from, size);
-        return ResponseEntity.ok(categoryService.getAllCategories(PageRequest.of(from, size)));
+        return categoryService.getAllCategories(PageRequest.of(from, size));
     }
 
     @GetMapping("/{catId}")
-    public ResponseEntity<CategoryDto> getCategoryById(@PathVariable("catId") Long id) {
+    public CategoryDto getCategoryById(@PathVariable("catId") Long id) {
         log.info("GET request for path /categories/{catId} with id={}", id);
-        return ResponseEntity.ok(categoryService.getCategoryById(id));
+        return categoryService.getCategoryById(id);
     }
 }

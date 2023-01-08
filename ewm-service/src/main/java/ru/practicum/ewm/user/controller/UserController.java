@@ -3,8 +3,6 @@ package ru.practicum.ewm.user.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.user.dto.UserDto;
@@ -25,25 +23,24 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping
-    public ResponseEntity<List<UserDto>> getUsersByIds(@RequestParam(required = false) Set<Long> ids,
-                                                       @RequestParam(required = false, defaultValue = "0")
-                                                       @PositiveOrZero int from,
-                                                       @RequestParam(required = false, defaultValue = "10")
-                                                       @Positive int size) {
+    public List<UserDto> getUsersByIds(@RequestParam(required = false) Set<Long> ids,
+                                       @RequestParam(required = false, defaultValue = "0")
+                                       @PositiveOrZero int from,
+                                       @RequestParam(required = false, defaultValue = "10")
+                                       @Positive int size) {
         log.info("GET request for path /admin/users with userIds={}, from={}, size={}", ids, from, size);
-        return ResponseEntity.ok(userService.getUsersByIds(ids, PageRequest.of(from, size)));
+        return userService.getUsersByIds(ids, PageRequest.of(from, size));
     }
 
     @PostMapping
-    public ResponseEntity<UserDto> createUser(@RequestBody @Valid UserDto userDto) {
+    public UserDto createUser(@RequestBody @Valid UserDto userDto) {
         log.info("POST request for path /admin/users with user: {}", userDto);
-        return ResponseEntity.ok(userService.createUser(userDto));
+        return userService.createUser(userDto);
     }
 
     @DeleteMapping("/{userId}")
-    public ResponseEntity<Object> deleteUser(@PathVariable("userId") Long id) {
+    public void deleteUser(@PathVariable("userId") Long id) {
         log.info("DELETE request for path /admin/users/{userId} with userId={}", id);
         userService.deleteUser(id);
-        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

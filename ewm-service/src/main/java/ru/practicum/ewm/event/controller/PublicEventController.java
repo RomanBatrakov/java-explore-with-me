@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.event.dto.EventDto;
@@ -28,7 +27,7 @@ public class PublicEventController {
     private final EventService eventService;
 
     @GetMapping
-    public ResponseEntity<List<EventShortDto>> getAllPublicEvents(
+    public List<EventShortDto> getAllPublicEvents(
             @RequestParam(required = false) String text,
             @RequestParam(required = false) Long[] categories,
             @RequestParam(required = false) Boolean paid,
@@ -41,13 +40,13 @@ public class PublicEventController {
             @RequestParam(defaultValue = "10") @Positive int size,
             HttpServletRequest request) {
         log.info("GET request for path /events");
-        return ResponseEntity.ok(eventService.getAllPublicEvents(text, categories, paid, rangeStart, rangeEnd,
-                onlyAvailable, sort, PageRequest.of(from, size), request));
+        return eventService.getAllPublicEvents(text, categories, paid, rangeStart, rangeEnd,
+                onlyAvailable, sort, PageRequest.of(from, size), request);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<EventDto> getPublicEventById(@PathVariable("id") Long id, HttpServletRequest request) {
+    public EventDto getPublicEventById(@PathVariable("id") Long id, HttpServletRequest request) {
         log.info("GET request for path /events/{id} with id={}", id);
-        return ResponseEntity.ok(eventService.getPublicEventById(id, request));
+        return eventService.getPublicEventById(id, request);
     }
 }

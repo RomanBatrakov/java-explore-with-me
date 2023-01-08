@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.event.dto.AdminUpdateEventDto;
@@ -27,7 +26,7 @@ public class AdminEventController {
     private final EventService eventService;
 
     @GetMapping
-    public ResponseEntity<List<EventDto>> getAllEventsByFilter(
+    public List<EventDto> getAllEventsByFilter(
             @RequestParam(required = false) List<Long> users,
             @RequestParam(required = false) List<State> states,
             @RequestParam(required = false) List<Long> categories,
@@ -37,26 +36,26 @@ public class AdminEventController {
             @RequestParam(required = false, defaultValue = "10") @Positive int size
     ) {
         log.info("GET request path /admin/events");
-        return ResponseEntity.ok(eventService.getAllEventsByFilter(users, states, categories, rangeStart, rangeEnd,
-                PageRequest.of(from, size)));
+        return eventService.getAllEventsByFilter(users, states, categories, rangeStart, rangeEnd,
+                PageRequest.of(from, size));
     }
 
     @PutMapping("/{eventId}")
-    public ResponseEntity<EventDto> updateEventByAdmin(@PathVariable(EVENT_ID_PATH_VARIABLE_KEY) Long eventId,
-                                                       @RequestBody AdminUpdateEventDto adminUpdateEventDto) {
+    public EventDto updateEventByAdmin(@PathVariable(EVENT_ID_PATH_VARIABLE_KEY) Long eventId,
+                                       @RequestBody AdminUpdateEventDto adminUpdateEventDto) {
         log.info("PUT request for path /admin/events/{eventId} with eventId={}", eventId);
-        return ResponseEntity.ok(eventService.updateEventByAdmin(eventId, adminUpdateEventDto));
+        return eventService.updateEventByAdmin(eventId, adminUpdateEventDto);
     }
 
     @PatchMapping("/{eventId}/publish")
-    public ResponseEntity<EventDto> publishEvent(@PathVariable(EVENT_ID_PATH_VARIABLE_KEY) Long id) {
+    public EventDto publishEvent(@PathVariable(EVENT_ID_PATH_VARIABLE_KEY) Long id) {
         log.info("PATCH request for path /admin/events/{eventId}/publish with eventId={}", id);
-        return ResponseEntity.ok(eventService.publishEvent(id));
+        return eventService.publishEvent(id);
     }
 
     @PatchMapping("/{eventId}/reject")
-    public ResponseEntity<EventDto> rejectEvent(@PathVariable(EVENT_ID_PATH_VARIABLE_KEY) Long id) {
+    public EventDto rejectEvent(@PathVariable(EVENT_ID_PATH_VARIABLE_KEY) Long id) {
         log.info("PATCH request for path /admin/events/{eventId}/reject with eventId={}", id);
-        return ResponseEntity.ok(eventService.rejectEvent(id));
+        return eventService.rejectEvent(id);
     }
 }
