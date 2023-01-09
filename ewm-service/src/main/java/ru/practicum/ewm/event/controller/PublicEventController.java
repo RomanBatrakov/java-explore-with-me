@@ -40,8 +40,8 @@ public class PublicEventController {
             @RequestParam(defaultValue = "10") @Positive int size,
             HttpServletRequest request) {
         log.info("GET request for path /events");
-        return eventService.getAllPublicEvents(text, categories, paid, rangeStart, rangeEnd,
-                onlyAvailable, sort, PageRequest.of(from, size), request);
+        return eventService.getAllPublicEvents(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort,
+                PageRequest.of(from, size), request);
     }
 
     @GetMapping("/{id}")
