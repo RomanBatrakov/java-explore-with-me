@@ -13,12 +13,12 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 public class LocationDto {
     private Long id;
-    @NotNull(message = "lat is null")
-    @Min(value = -90, message = "lat cant be less than -90")
-    @Max(value = 90, message = "lat cant be more than 90")
+    @NotNull(message = " is null")
+    @Min(value = -90, message = " cant be less than -90")
+    @Max(value = 90, message = " cant be more than 90")
     private Float lat;
-    @NotNull(message = "lon is null")
-    @Min(value = -180, message = "lat cant be less than -180")
-    @Max(value = 180, message = "lat cant be more than 180")
+    @NotNull(message = " is null")
+    @Min(value = -180, message = " cant be less than -180")
+    @Max(value = 180, message = " cant be more than 180")
     private Float lon;
 }

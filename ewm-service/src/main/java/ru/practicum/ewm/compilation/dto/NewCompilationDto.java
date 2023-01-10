@@ -13,8 +13,8 @@ import java.util.List;
 @NoArgsConstructor
 public class NewCompilationDto {
     private Long id;
-    @NotBlank(message = "Title is mandatory")
-    @Size(max = 255, message = "Title is to long")
+    @NotBlank(message = " is blank or null")
+    @Size(max = 255, message = " is to long")
     private String title;
     private boolean pinned;
     private List<Long> events;

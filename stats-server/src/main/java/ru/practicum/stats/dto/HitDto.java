@@ -14,11 +14,11 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class HitDto {
     private Long id;
-    @NotBlank(message = "app is mandatory")
+    @NotBlank(message = " is blank or null")
     private String app;
-    @NotBlank(message = "uri is mandatory")
+    @NotBlank(message = " is blank or null")
     private String uri;
-    @NotBlank(message = "ip is mandatory")
+    @NotBlank(message = " is blank or null")
     private String ip;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")

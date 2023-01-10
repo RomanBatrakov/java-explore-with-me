@@ -15,19 +15,19 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UpdateEventDto {
-    @NotNull(message = "eventId is null")
+    @NotNull(message = " is null")
     private Long eventId;
-    @Size(min = 20, max = 2000)
+    @Size(min = 20, max = 2000, message = " has wrong size")
     private String annotation;
     private Long category;
-    @Size(min = 20, max = 7000)
+    @Size(min = 20, max = 7000, message = " has wrong size")
     private String description;
-    @Future(message = "eventDate is not future")
+    @Future(message = " is not future")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime eventDate;
     private Boolean paid;
     private Long participantLimit;
-    @Size(min = 3, max = 120)
+    @Size(min = 3, max = 120, message = " has wrong size")
     private String title;
 }

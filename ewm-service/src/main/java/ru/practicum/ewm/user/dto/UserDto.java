@@ -13,10 +13,10 @@ import javax.validation.constraints.Size;
 @NoArgsConstructor
 public class UserDto {
     private Long id;
-    @NotBlank(message = "Name is mandatory")
-    @Size(max = 50, message = "Name is to long")
+    @NotBlank(message = " is blank or null")
+    @Size(max = 50, message = " is to long")
     private String name;
-    @NotBlank(message = "Email is mandatory")
-    @Email(message = "Email is incorrect")
+    @NotBlank(message = " is blank or null")
+    @Email(message = " is incorrect")
     private String email;
 }

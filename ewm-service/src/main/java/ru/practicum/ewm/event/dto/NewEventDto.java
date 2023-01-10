@@ -17,31 +17,31 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class NewEventDto {
-    @NotBlank(message = "annotation is mandatory")
-    @Size(min = 20, max = 2000)
+    @NotBlank(message = " is blank or null")
+    @Size(min = 20, max = 2000, message = " has wrong size")
     private String annotation;
-    @NotNull(message = "category is null")
+    @NotNull(message = " is null")
     private Long category;
-    @NotBlank(message = "description is mandatory")
-    @Size(min = 20, max = 7000)
+    @NotBlank(message = " is blank or null")
+    @Size(min = 20, max = 7000, message = " has wrong size")
     private String description;
     @NotNull
     @Future
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime eventDate;
-    @NotNull(message = "location is null")
+    @NotNull(message = " is null")
     private LocationDto location;
-    @NotNull(message = "paid is null")
+    @NotNull(message = " is null")
     @Builder.Default
     private Boolean paid = false;
-    @NotNull(message = "participantLimit is null")
+    @NotNull(message = " is null")
     @Builder.Default
     private Long participantLimit = 0L;
-    @NotNull(message = "requestModeration is null")
+    @NotNull(message = " is null")
     @Builder.Default
     private Boolean requestModeration = true;
-    @NotNull(message = "title is null")
-    @Size(min = 3, max = 120)
+    @NotNull(message = " is null")
+    @Size(min = 3, max = 120, message = " has wrong size")
     private String title;
 }
