@@ -68,19 +68,19 @@ __The _Ratings_ feature is included in the ewm-service__
 </details>
 
 ## Swagger specification for REST API
-- [Ewm-service](https://github.com/RomanBatrakov/java-explore-with-me/blob/ewm-main-service-spec.json)
-- [Stats-server](https://github.com/RomanBatrakov/java-explore-with-me/blob/ewm-stats-service-spec.json)
+- [Ewm-service](ewm-main-service-spec.json)
+- [Stats-server](ewm-stats-service-spec.json)
 
 ## Postman tests for services:
 - [Ewm-service](postman/ewm-main-service.json)
-- [Stats-server](https://github.com/RomanBatrakov/java-explore-with-me/blob/postman/postman/ewm-stat-service.json)
+- [Stats-server](postman/ewm-stat-service.json)
 
 ## Architecture schema of the project:
-![Architecture schema](https://github.com/RomanBatrakov/java-filmorate/blob/main/ER%20diagram.png)
+![Architecture schema](https://github)
 
 ## Database description:
 <details>
     <summary><h3>ER diagram:</h3></summary>
 
-![ER diagram](https://github.com/RomanBatrakov/java-filmorate/blob/main/ER%20diagram.png)
+![ER diagram](https://github.com/RomanBatrakov/java-filmorat)
 </details>
