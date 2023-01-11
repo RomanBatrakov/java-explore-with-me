@@ -65,7 +65,7 @@ __The _Ratings_ feature is included in the ewm-service__
 >> - Event creators cannot rate their own events
 </details>
 
-## Swagger specification for REST API
+## Swagger specification for REST API:
 - [Ewm-service](ewm-main-service-spec.json)
 - [Stats-server](ewm-stats-service-spec.json)
 
