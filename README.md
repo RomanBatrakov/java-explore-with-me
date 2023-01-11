@@ -36,33 +36,33 @@ While in the directory on the command line, type:
 __The ewm-service, assigned port: 8080__
 
 >__Public (available to all users)__
->> - API for working with events
->> - API for working with categories
+> - API for working with events
+> - API for working with categories
 > 
 >__Private (available only to registered users)__
->> - API for working with events
->> - API for working with requests of the current user to participate in events
->> - API for working with ratings
+> - API for working with events
+> - API for working with requests of the current user to participate in events
+> - API for working with ratings
 >
 >__Administrative (available only to project administrator)__
->> - API for working with events
->> - API for working with categories
->> - API for working with users
->> - API for working with event compilations
+> - API for working with events
+> - API for working with categories
+> - API for working with users
+> - API for working with event compilations
 
 __Statistics service, assigned port: 9090__
 
 >__Administrative (available only to the project administrator)__
->> - API for working with visit statistics
+> - API for working with visit statistics
 
 __The _Ratings_ feature is included in the ewm-service__
->> - Sorting events by rating
->> - The ability to like/dislike an event
->> - Only Published events can be rated
->> - Only users with confirmed participation can change the rating
->> - When the rating of an event is changed, the rating of the event creator is also changed
->> - When viewing events publicly, the data of the event creator is hidden.
->> - Event creators cannot rate their own events
+> - Sorting events by rating
+> - The ability to like/dislike an event
+> - Only Published events can be rated
+> - Only users with confirmed participation can change the rating
+> - When the rating of an event is changed, the rating of the event creator is also changed
+> - When viewing events publicly, the data of the event creator is hidden.
+> - Event creators cannot rate their own events
 </details>
 
 ## Swagger specification for REST API:
