@@ -9,7 +9,6 @@ Explore with me - REST API for an application that provides the ability to share
 - Docker, Postman.
 
 ## Project Structure:
-<details>
 There are 2 microservices made as modules in project:
 
 Ewm-service - contains everything necessary for operation:
@@ -24,7 +23,6 @@ Ewm-service - contains everything necessary for operation:
 Stats-server - stores the number of views and allows to make various selections for analyzing the application usage.
 - Separate service for collecting statistics.
 - Runs on port 9090.
-</details>
 
 ## Quick start:
 While in the directory on the command line, type:
@@ -79,8 +77,4 @@ __The _Ratings_ feature is included in the ewm-service__
 ![Architecture schema](https://github)
 
 ## Database description:
-<details>
-    <summary><h3>ER diagram:</h3></summary>
-
 ![ER diagram](https://github.com/RomanBatrakov/java-filmorat)
-</details>
