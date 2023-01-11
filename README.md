@@ -72,7 +72,7 @@ __The _Ratings_ feature is included in the ewm-service__
 - [Stats-server](https://github.com/RomanBatrakov/java-explore-with-me/blob/ewm-stats-service-spec.json)
 
 ## Postman tests for services:
-- [Ewm-service](https://github.com/RomanBatrakov/java-explore-with-me/blob/postman/ewm-main-service.json)
+- [Ewm-service](postman/ewm-main-service.json)
 - [Stats-server](https://github.com/RomanBatrakov/java-explore-with-me/blob/postman/postman/ewm-stat-service.json)
 
 ## Architecture schema of the project:
