@@ -281,7 +281,8 @@ public class EventServiceImpl implements EventService {
                 .map(Event::getId)
                 .map(id -> URLEncoder.encode("/events/" + id, StandardCharsets.UTF_8))
                 .collect(Collectors.toList());
-        List<Stats> statsList = hitClient.findStats(LOCAL_DATE_TIME_NOW.minusYears(3), LOCAL_DATE_TIME_NOW.plusYears(10), eventsUrl, false);
+        List<Stats> statsList = hitClient.findStats(LOCAL_DATE_TIME_NOW.minusYears(3),
+                LOCAL_DATE_TIME_NOW.plusYears(10), eventsUrl, false);
         Map<String, Long> statMap = statsList.stream()
                 .collect(Collectors.toMap(Stats::getUri, Stats::getHits));
         events.forEach(event -> event.setViews(statMap.getOrDefault("/events/" + event.getId(), 0L)));

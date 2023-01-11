@@ -36,7 +36,6 @@ class AdminCategoryControllerTest {
     @BeforeEach
     void setUp() {
         categoryDto = CategoryDto.builder().id(1L).name("Category1").build();
-
     }
 
     @Test
