@@ -11,7 +11,7 @@ public class Rating {
     @Builder.Default
     private Long dislikes = 0L;
     @Builder.Default
-    private Double rating = 0.00;
+    private Double rating = 0.0;
 
 
     public Long getLikes() {
@@ -20,6 +20,7 @@ public class Rating {
 
     public void setLikes(Long likes) {
         this.likes = likes;
+        calculateRating();
     }
 
     public Long getDislikes() {
@@ -28,9 +29,19 @@ public class Rating {
 
     public void setDislikes(Long dislikes) {
         this.dislikes = dislikes;
+        calculateRating();
     }
 
     public Double getRating() {
         return rating;
+    }
+
+    private void calculateRating() {
+        long totalVotes = this.likes + this.dislikes;
+        if (totalVotes == 0) {
+            this.rating = 0.0;
+        } else {
+            this.rating = (double) (this.likes / totalVotes) * 10;
+        }
     }
 }
