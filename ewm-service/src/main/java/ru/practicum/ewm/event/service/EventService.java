@@ -44,4 +44,6 @@ public interface EventService {
     void addViewsToEvents(List<Event> events);
 
     Boolean existsByCategoryId(Long id);
+
+    void createReaction(Long userId, Long eventId, String reaction);
 }

@@ -41,8 +41,13 @@ public class CompilationServiceImpl implements CompilationService {
     @Override
     public CompilationDto getCompilationById(Long id) {
         log.info("Getting compilation with id={}", id);
-        return compilationMapper.toCompilationDto(compilationRepository.findById(id).orElseThrow(
-                () -> new NoSuchElementException(String.format("compilation with id %s is not found", id))));
+        return compilationMapper.toCompilationDto(findCompilationById(id));
+    }
+    @Override
+    public Compilation findCompilationById(Long id) {
+        log.info("Finding compilation with id={}", id);
+        return compilationRepository.findById(id).orElseThrow(
+                () -> new NoSuchElementException(String.format("Compilation with id %s is not found", id)));
     }
 
     @Override
@@ -67,7 +72,7 @@ public class CompilationServiceImpl implements CompilationService {
     @Override
     public void deleteEventFromCompilation(Long id, Long eventId) {
         log.info("Deleting event with eventId={} from compilation with id={}", eventId, id);
-        Compilation compilation = compilationMapper.toCompilation(getCompilationById(id));
+        Compilation compilation = findCompilationById(id);
         compilation.getEvents().removeIf(x -> x.getId().equals(eventId));
         compilationRepository.save(compilation);
     }
@@ -75,7 +80,7 @@ public class CompilationServiceImpl implements CompilationService {
     @Override
     public void addEventToCompilation(Long id, Long eventId) {
         log.info("Adding event with eventId={} from compilation with id={}", eventId, id);
-        Compilation compilation = compilationMapper.toCompilation(getCompilationById(id));
+        Compilation compilation = findCompilationById(id);
         Event event = eventMapper.toEvent(eventService.getEventById(eventId));
         compilation.getEvents().add(event);
         compilationRepository.save(compilation);
@@ -84,8 +89,7 @@ public class CompilationServiceImpl implements CompilationService {
     @Override
     public void pinChangeCompilation(Long id, Boolean pinned) {
         log.info("Pin {} compilation with id={}", pinned, id);
-        Compilation compilation = compilationRepository.findById(id).orElseThrow(
-                () -> new NoSuchElementException(String.format("Compilation with id %s is not found", id)));
+        Compilation compilation = findCompilationById(id);
         compilation.setPinned(pinned);
         compilationRepository.save(compilation);
     }

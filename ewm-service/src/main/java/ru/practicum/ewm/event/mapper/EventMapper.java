@@ -14,7 +14,7 @@ public interface EventMapper {
 
     @Mapping(target = "category", ignore = true)
     Event fromNewEvent(NewEventDto newEventDto);
-
+    @Mapping(target = "rating", source = "rating.rating")
     EventShortDto toEventShortDto(Event event);
 
     List<EventShortDto> toEventShortDtoList(List<Event> events);

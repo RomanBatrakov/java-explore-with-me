@@ -20,4 +20,6 @@ public interface RequestService {
     RequestDto changeRequestStatus(Long userId, Long eventId, Long requestId, RequestStatus status);
 
     void setConfirmedRequestsFromDb(List<Event> events);
+
+    boolean validateUserParticipation(Long userId, Long eventId);
 }

@@ -18,6 +18,10 @@ import ru.practicum.ewm.exeption.ValidationException;
 import ru.practicum.ewm.hit.client.HitClient;
 import ru.practicum.ewm.hit.model.Hit;
 import ru.practicum.ewm.hit.model.Stats;
+import ru.practicum.ewm.reaction.dao.ReactionRepository;
+import ru.practicum.ewm.reaction.model.Reaction;
+import ru.practicum.ewm.reaction.model.ReactionId;
+import ru.practicum.ewm.reaction.model.ReactionType;
 import ru.practicum.ewm.request.service.RequestService;
 import ru.practicum.ewm.user.mapper.UserMapper;
 import ru.practicum.ewm.user.model.User;
@@ -48,11 +52,12 @@ public class EventServiceImpl implements EventService {
     private final RequestService requestService;
     private final CategoryService categoryService;
     private final CategoryMapper categoryMapper;
+    private final ReactionRepository reactionRepository;
     private final HitClient hitClient;
 
     public EventServiceImpl(EventRepository eventRepository, EventMapper eventMapper, UserMapper userMapper,
                             UserService userService, @Lazy RequestService requestService,
-                            @Lazy CategoryService categoryService, CategoryMapper categoryMapper, HitClient hitClient) {
+                            @Lazy CategoryService categoryService, CategoryMapper categoryMapper, ReactionRepository reactionRepository, HitClient hitClient) {
         this.eventRepository = eventRepository;
         this.eventMapper = eventMapper;
         this.userMapper = userMapper;
@@ -60,6 +65,7 @@ public class EventServiceImpl implements EventService {
         this.requestService = requestService;
         this.categoryService = categoryService;
         this.categoryMapper = categoryMapper;
+        this.reactionRepository = reactionRepository;
         this.hitClient = hitClient;
     }
 
@@ -111,6 +117,7 @@ public class EventServiceImpl implements EventService {
         }
     }
 
+    //TODO: добавить рейтинг в список событий
     @Override
     public List<Event> eventsIdsToEvents(List<Long> events) {
         log.info("Converting events ids: {} to events", events);
@@ -277,6 +284,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public void addViewsToEvents(List<Event> events) {
+        log.info("Adding views to events={}", events);
         List<String> eventsUrl = events.stream()
                 .map(Event::getId)
                 .map(id -> URLEncoder.encode("/events/" + id, StandardCharsets.UTF_8))
@@ -291,5 +299,25 @@ public class EventServiceImpl implements EventService {
     @Override
     public Boolean existsByCategoryId(Long id) {
         return eventRepository.existsEventsByCategory_Id(id);
+    }
+
+    @Override
+    public void createReaction(Long userId, Long eventId, String reaction) {
+        log.info("Creating reaction={}", reaction);
+        ReactionType reactionType = ReactionType.from(reaction)
+                .orElseThrow(() -> new ValidationException(String.format("Unknown reaction: %s", reaction)));
+        try {
+            Event event = eventRepository.findEventByIdAndState(eventId, State.PUBLISHED);
+            User user = userMapper.toUser(userService.getUserById(userId));
+            if (!event.getInitiator().equals(user) && requestService.validateUserParticipation(userId, eventId)) {
+                ReactionId reactionId = ReactionId.builder().event(event).user(user).build();
+                Reaction userReaction = Reaction.builder().id(reactionId).reaction(reactionType).build();
+                reactionRepository.save(userReaction);
+            } else {
+                throw new ValidationException(String.format("User %s is not a event %s participant", userId, eventId));
+            }
+        } catch (NoSuchElementException e) {
+            throw new NoSuchElementException(String.format("Event with id %s is not found", eventId));
+        }
     }
 }

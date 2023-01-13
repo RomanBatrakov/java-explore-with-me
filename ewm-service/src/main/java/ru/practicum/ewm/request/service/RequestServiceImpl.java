@@ -37,10 +37,10 @@ public class RequestServiceImpl implements RequestService {
     private final EventService eventService;
 
     @Override
-    public List<RequestDto> getAllUserRequests(Long id) {
+    public List<RequestDto> getAllUserRequests(Long userId) {
         try {
-            log.info("Getting user requests with userId={}", id);
-            return requestRepository.findAllByRequesterId(id).stream()
+            log.info("Getting user requests with userId={}", userId);
+            return requestRepository.findAllByRequesterId(userId).stream()
                     .map(requestMapper::toRequestDto)
                     .collect(Collectors.toList());
         } catch (NoSuchElementException e) {
@@ -114,7 +114,6 @@ public class RequestServiceImpl implements RequestService {
         }
     }
 
-
     @Override
     public void rejectOtherRequests(Long eventId) {
         log.info("Rejecting event request with eventId={}", eventId);
@@ -146,5 +145,11 @@ public class RequestServiceImpl implements RequestService {
                 .collect(Collectors.groupingBy(Request::getEvent, Collectors.counting()));
         events.forEach(event -> event.setConfirmedRequests(
                 confirmedRequestsCountByEvent.getOrDefault(event, 0L)));
+    }
+
+    @Override
+    public boolean validateUserParticipation(Long userId, Long eventId) {
+        log.info("Validating user participation with userId={}, eventId: {}", userId, eventId);
+        return requestRepository.existsByRequester_IdAndEvent_IdAndStatus(userId, eventId, PENDING);
     }
 }
