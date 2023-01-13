@@ -97,12 +97,20 @@ public class PrivateEventController {
                 .changeRequestStatus(userId, eventId, requestId, RequestStatus.REJECTED);
     }
 
-    @PostMapping("/{eventId}/{reaction}")
+    @PostMapping("/{eventId}/reaction/{reaction}")
     public void createReaction(@PathVariable(USER_ID_PATH_VARIABLE_KEY) Long userId,
                                @PathVariable(EVENT_ID_PATH_VARIABLE_KEY) Long eventId,
                                @PathVariable(name = "reaction") String reaction) {
-        log.info("POST request for path /users/{userId}/events/{eventId}/{reaction} with userId={}, eventId={}," +
-                " reaction={}", userId, eventId, reaction);
+        log.info("POST request for path /users/{userId}/events/{eventId}/reaction/{reaction} with userId={}," +
+                " eventId={}, reaction={}", userId, eventId, reaction);
         eventService.createReaction(userId, eventId, reaction);
+    }
+
+    @DeleteMapping("/{eventId}/reaction")
+    public void deleteReaction(@PathVariable(USER_ID_PATH_VARIABLE_KEY) Long userId,
+                               @PathVariable(EVENT_ID_PATH_VARIABLE_KEY) Long eventId) {
+        log.info("DELETE request for path /users/{userId}/events/{eventId}/reaction with userId={}, eventId={}", userId,
+                eventId);
+        eventService.deleteReaction(userId, eventId);
     }
 }

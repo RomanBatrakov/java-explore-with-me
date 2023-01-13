@@ -3,6 +3,7 @@ package ru.practicum.ewm.event.service;
 import com.querydsl.core.types.Predicate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClientRequestException;
@@ -318,6 +319,19 @@ public class EventServiceImpl implements EventService {
             }
         } catch (NoSuchElementException e) {
             throw new NoSuchElementException(String.format("Event with id %s is not found", eventId));
+        }
+    }
+//TODO: создать реактонсервис и в нем реализовать методы основные по реакциям + доделать метод удаления
+    @Override
+    public void deleteReaction(Long userId, Long eventId) {
+        try {
+            log.info("Deleting reaction with userId={}, eventId={}", userId, eventId);
+            Event event = eventRepository.findEventByIdAndState(eventId, State.PUBLISHED);
+            User user = userMapper.toUser(userService.getUserById(userId));
+            ReactionId reactionId = ReactionId.builder().event(event).user(user).build();
+            reactionRepository.deleteById(reactionId);
+        } catch (EmptyResultDataAccessException e) {
+            throw new NoSuchElementException(String.format("Compilation with id %s is not found", id));
         }
     }
 }

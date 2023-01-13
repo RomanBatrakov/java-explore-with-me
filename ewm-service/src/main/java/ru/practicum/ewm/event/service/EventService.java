@@ -46,4 +46,6 @@ public interface EventService {
     Boolean existsByCategoryId(Long id);
 
     void createReaction(Long userId, Long eventId, String reaction);
+
+    void deleteReaction(Long userId, Long eventId);
 }
