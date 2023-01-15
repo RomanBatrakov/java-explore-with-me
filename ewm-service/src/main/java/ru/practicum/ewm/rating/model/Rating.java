@@ -1,6 +1,8 @@
 package ru.practicum.ewm.rating.model;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 
 @Builder
 @AllArgsConstructor

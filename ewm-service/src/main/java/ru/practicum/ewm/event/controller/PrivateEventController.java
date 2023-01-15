@@ -10,6 +10,7 @@ import ru.practicum.ewm.event.dto.EventShortDto;
 import ru.practicum.ewm.event.dto.NewEventDto;
 import ru.practicum.ewm.event.dto.UpdateEventDto;
 import ru.practicum.ewm.event.service.EventService;
+import ru.practicum.ewm.reaction.dto.ReactionDto;
 import ru.practicum.ewm.request.dto.RequestDto;
 import ru.practicum.ewm.request.model.RequestStatus;
 import ru.practicum.ewm.request.service.RequestService;
@@ -98,12 +99,12 @@ public class PrivateEventController {
     }
 
     @PostMapping("/{eventId}/reaction/{reaction}")
-    public void createReaction(@PathVariable(USER_ID_PATH_VARIABLE_KEY) Long userId,
-                               @PathVariable(EVENT_ID_PATH_VARIABLE_KEY) Long eventId,
-                               @PathVariable(name = "reaction") String reaction) {
+    public ReactionDto createReaction(@PathVariable(USER_ID_PATH_VARIABLE_KEY) Long userId,
+                                      @PathVariable(EVENT_ID_PATH_VARIABLE_KEY) Long eventId,
+                                      @PathVariable(name = "reaction") String reaction) {
         log.info("POST request for path /users/{userId}/events/{eventId}/reaction/{reaction} with userId={}," +
                 " eventId={}, reaction={}", userId, eventId, reaction);
-        eventService.createReaction(userId, eventId, reaction);
+        return eventService.createReaction(userId, eventId, reaction);
     }
 
     @DeleteMapping("/{eventId}/reaction")

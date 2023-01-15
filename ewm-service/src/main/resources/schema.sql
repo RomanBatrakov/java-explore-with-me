@@ -78,10 +78,10 @@ CREATE TABLE IF NOT EXISTS events_compilation
 
 CREATE TABLE IF NOT EXISTS reactions
 (
-    user_id  BIGINT       NOT NULL
-        REFERENCES users ON DELETE CASCADE,
-    event_id BIGINT       NOT NULL
-        REFERENCES events ON DELETE CASCADE,
     reaction VARCHAR(10) NOT NULL,
+    user_id  BIGINT      NOT NULL
+        REFERENCES users ON DELETE CASCADE,
+    event_id BIGINT      NOT NULL
+        REFERENCES events ON DELETE CASCADE,
     PRIMARY KEY (user_id, event_id)
 );

@@ -150,6 +150,6 @@ public class RequestServiceImpl implements RequestService {
     @Override
     public boolean validateUserParticipation(Long userId, Long eventId) {
         log.info("Validating user participation with userId={}, eventId: {}", userId, eventId);
-        return requestRepository.existsByRequester_IdAndEvent_IdAndStatus(userId, eventId, PENDING);
+        return requestRepository.existsByRequester_IdAndEvent_IdAndStatus(userId, eventId, CONFIRMED);
     }
 }

@@ -19,7 +19,7 @@ import ru.practicum.ewm.hit.client.HitClient;
 import ru.practicum.ewm.hit.model.Hit;
 import ru.practicum.ewm.hit.model.Stats;
 import ru.practicum.ewm.rating.model.Rating;
-import ru.practicum.ewm.reaction.dao.ReactionRepository;
+import ru.practicum.ewm.reaction.dto.ReactionDto;
 import ru.practicum.ewm.reaction.model.ReactionType;
 import ru.practicum.ewm.reaction.service.ReactionService;
 import ru.practicum.ewm.request.service.RequestService;
@@ -57,8 +57,9 @@ public class EventServiceImpl implements EventService {
     private final HitClient hitClient;
 
     public EventServiceImpl(EventRepository eventRepository, EventMapper eventMapper, UserMapper userMapper,
-                            UserService userService, @Lazy RequestService requestService,
-                            @Lazy CategoryService categoryService, CategoryMapper categoryMapper, ReactionRepository reactionRepository, ReactionService reactionService, HitClient hitClient) {
+                            @Lazy UserService userService, @Lazy RequestService requestService,
+                            @Lazy CategoryService categoryService, CategoryMapper categoryMapper,
+                            ReactionService reactionService, HitClient hitClient) {
         this.eventRepository = eventRepository;
         this.eventMapper = eventMapper;
         this.userMapper = userMapper;
@@ -89,7 +90,7 @@ public class EventServiceImpl implements EventService {
         }
         if (popular) {
             events = events.stream()
-                    .sorted(Comparator.comparingDouble(e -> e.getRating().getRating()))
+                    .sorted(Comparator.comparing(e -> e.getRating().getRating(), Comparator.reverseOrder()))
                     .collect(Collectors.toList());
         }
         postHitToStatsServer(request);
@@ -191,13 +192,20 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<EventShortDto> getEventsByUser(Long userId, Pageable pageable) {
+        log.info("Getting events by userId={}", userId);
+        List<Event> eventList = getEventListByUser(userId, pageable);
+        return eventMapper.toEventShortDtoList(eventList);
+    }
+
+    @Override
+    public List<Event> getEventListByUser(Long userId, Pageable pageable) {
         try {
-            log.info("Getting events by userId={}", userId);
+            log.info("Getting eventList by userId={}", userId);
             List<Event> eventList = eventRepository.findEventsByInitiator_Id(userId, pageable);
             requestService.setConfirmedRequestsFromDb(eventList);
             reactionService.setRating(eventList);
             addViewsToEvents(eventList);
-            return eventMapper.toEventShortDtoList(eventList);
+            return eventList;
         } catch (NoSuchElementException e) {
             return new ArrayList<>();
         }
@@ -317,25 +325,16 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public void createReaction(Long userId, Long eventId, String reaction) {
+    public ReactionDto createReaction(Long userId, Long eventId, String reaction) {
         log.info("Creating reaction={}", reaction);
         ReactionType reactionType = ReactionType.from(reaction)
-                .orElseThrow(() -> new ValidationException(String.format("Unknown reaction: %s", reaction)));
+                .orElseThrow(() -> new ValidationException("Unknown reaction: " + reaction));
         Event event = findPublishedEventById(eventId);
         User user = userMapper.toUser(userService.getUserById(userId));
         if (!event.getInitiator().equals(user) && requestService.validateUserParticipation(userId, eventId)) {
-            reactionService.createReaction(user, event, reactionType);
+            return reactionService.createReaction(user, event, reactionType);
         } else {
             throw new ValidationException(String.format("User %s is not a event %s participant", userId, eventId));
-        }
-    }
-
-    private Event findPublishedEventById(Long eventId) {
-        try {
-            log.info("Finding event={}", eventId);
-            return eventRepository.findEventByIdAndState(eventId, PUBLISHED);
-        } catch (NoSuchElementException e) {
-            throw new NoSuchElementException(String.format("Event with id %s is not found", eventId));
         }
     }
 
@@ -345,5 +344,15 @@ public class EventServiceImpl implements EventService {
         Event event = findPublishedEventById(eventId);
         User user = userMapper.toUser(userService.getUserById(userId));
         reactionService.deleteById(user, event);
+    }
+
+    @Override
+    public Event findPublishedEventById(Long eventId) {
+        try {
+            log.info("Finding event={}", eventId);
+            return eventRepository.findEventByIdAndState(eventId, PUBLISHED);
+        } catch (NoSuchElementException e) {
+            throw new NoSuchElementException(String.format("Event with id %s is not found", eventId));
+        }
     }
 }

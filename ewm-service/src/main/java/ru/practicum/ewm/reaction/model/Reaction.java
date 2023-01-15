@@ -2,10 +2,7 @@ package ru.practicum.ewm.reaction.model;
 
 import lombok.*;
 
-import javax.persistence.Column;
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Getter
 @Setter
@@ -18,5 +15,6 @@ public class Reaction {
     @EmbeddedId
     private ReactionId id;
     @Column(name = "reaction")
+    @Enumerated(EnumType.STRING)
     private ReactionType reaction;
 }

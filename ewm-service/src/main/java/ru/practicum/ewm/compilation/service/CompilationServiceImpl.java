@@ -43,6 +43,7 @@ public class CompilationServiceImpl implements CompilationService {
         log.info("Getting compilation with id={}", id);
         return compilationMapper.toCompilationDto(findCompilationById(id));
     }
+
     @Override
     public Compilation findCompilationById(Long id) {
         log.info("Finding compilation with id={}", id);

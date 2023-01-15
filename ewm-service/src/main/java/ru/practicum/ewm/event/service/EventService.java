@@ -4,6 +4,7 @@ import org.springframework.data.domain.Pageable;
 import ru.practicum.ewm.event.dto.*;
 import ru.practicum.ewm.event.model.Event;
 import ru.practicum.ewm.event.model.State;
+import ru.practicum.ewm.reaction.dto.ReactionDto;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
@@ -31,6 +32,8 @@ public interface EventService {
 
     List<EventShortDto> getEventsByUser(Long userId, Pageable pageable);
 
+    List<Event> getEventListByUser(Long userId, Pageable pageable);
+
     EventDto updateEventByUser(Long userId, UpdateEventDto updateEventDto);
 
     EventDto createEventByUser(NewEventDto newEventDto, Long userId);
@@ -45,7 +48,9 @@ public interface EventService {
 
     Boolean existsByCategoryId(Long id);
 
-    void createReaction(Long userId, Long eventId, String reaction);
+    ReactionDto createReaction(Long userId, Long eventId, String reaction);
 
     void deleteReaction(Long userId, Long eventId);
+
+    Event findPublishedEventById(Long eventId);
 }

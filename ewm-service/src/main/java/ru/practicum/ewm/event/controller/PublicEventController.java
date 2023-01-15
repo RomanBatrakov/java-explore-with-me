@@ -34,7 +34,7 @@ public class PublicEventController {
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeStart,
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
             @RequestParam(defaultValue = "false") Boolean onlyAvailable,
-            @RequestParam(defaultValue = "false") Boolean popular,
+            @RequestParam(required = false, defaultValue = "false") Boolean popular,
             @RequestParam(required = false)
             @Pattern(regexp = sortValidation, message = "Incorrect type of sort") String sort,
             @RequestParam(defaultValue = "0") @PositiveOrZero int from,

@@ -20,6 +20,10 @@ public interface CompilationMapper {
     Compilation toCompilation(NewCompilationDto newCompilationDto);
 
     default Double mapRatingtoDouble(Rating rating) {
-        return rating.getRating();
+        if (rating != null) {
+            return rating.getRating();
+        } else {
+            return 0.0;
+        }
     }
 }
