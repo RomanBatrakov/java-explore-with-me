@@ -32,7 +32,7 @@ public class ReactionServiceImpl implements ReactionService {
     public ReactionDto createReaction(User user, Event event, ReactionType reactionType) {
         ReactionId reactionId = ReactionId.builder().event(event).user(user).build();
         Reaction userReaction = Reaction.builder().id(reactionId).reaction(reactionType).build();
-        return reactionMapper.ReactionDto(reactionRepository.save(userReaction));
+        return reactionMapper.reactionDto(reactionRepository.save(userReaction));
     }
 
     @Override

@@ -10,5 +10,5 @@ import ru.practicum.ewm.reaction.model.Reaction;
 public interface ReactionMapper {
     @Mapping(target = "userId", source = "id.user.id")
     @Mapping(target = "eventId", source = "id.event.id")
-    ReactionDto ReactionDto(Reaction reaction);
+    ReactionDto reactionDto(Reaction reaction);
 }
