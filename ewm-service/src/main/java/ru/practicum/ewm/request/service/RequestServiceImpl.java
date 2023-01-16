@@ -87,7 +87,7 @@ public class RequestServiceImpl implements RequestService {
         EventDto eventDto = eventService.getEventById(eventId);
         if (!eventDto.getInitiator().getId().equals(userId)) throw new ValidationException("Wrong initiator");
         try {
-            return requestRepository.findAllByEvent_Id(eventId).stream()
+            return requestRepository.findAllByEventId(eventId).stream()
                     .map(requestMapper::toRequestDto)
                     .collect(Collectors.toList());
         } catch (NoSuchElementException e) {
@@ -118,7 +118,7 @@ public class RequestServiceImpl implements RequestService {
     public void rejectOtherRequests(Long eventId) {
         log.info("Rejecting event request with eventId={}", eventId);
         try {
-            List<Request> requests = requestRepository.findAllByEvent_IdAndStatus(eventId, PENDING).stream()
+            List<Request> requests = requestRepository.findAllByEventIdAndStatus(eventId, PENDING).stream()
                     .peek(x -> x.setStatus(REJECTED))
                     .collect(Collectors.toList());
             requestRepository.saveAll(requests);
@@ -150,6 +150,6 @@ public class RequestServiceImpl implements RequestService {
     @Override
     public boolean validateUserParticipation(Long userId, Long eventId) {
         log.info("Validating user participation with userId={}, eventId: {}", userId, eventId);
-        return requestRepository.existsByRequester_IdAndEvent_IdAndStatus(userId, eventId, CONFIRMED);
+        return requestRepository.existsByRequesterIdAndEventIdAndStatus(userId, eventId, CONFIRMED);
     }
 }

@@ -44,8 +44,7 @@ public class CompilationServiceImpl implements CompilationService {
         return compilationMapper.toCompilationDto(findCompilationById(id));
     }
 
-    @Override
-    public Compilation findCompilationById(Long id) {
+    private Compilation findCompilationById(Long id) {
         log.info("Finding compilation with id={}", id);
         return compilationRepository.findById(id).orElseThrow(
                 () -> new NoSuchElementException(String.format("Compilation with id %s is not found", id)));

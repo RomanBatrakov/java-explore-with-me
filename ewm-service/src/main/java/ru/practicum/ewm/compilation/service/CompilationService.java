@@ -12,8 +12,6 @@ public interface CompilationService {
 
     CompilationDto getCompilationById(Long id);
 
-    Compilation findCompilationById(Long id);
-
     CompilationDto createCompilation(NewCompilationDto newCompilationDto);
 
     void deleteCompilation(Long id);

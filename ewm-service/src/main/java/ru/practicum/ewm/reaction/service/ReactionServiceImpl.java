@@ -32,7 +32,7 @@ public class ReactionServiceImpl implements ReactionService {
     public ReactionDto createReaction(User user, Event event, ReactionType reactionType) {
         ReactionId reactionId = ReactionId.builder().event(event).user(user).build();
         Reaction userReaction = Reaction.builder().id(reactionId).reaction(reactionType).build();
-        return reactionMapper.reactionDto(reactionRepository.save(userReaction));
+        return reactionMapper.toReactionDto(reactionRepository.save(userReaction));
     }
 
     @Override
@@ -47,7 +47,7 @@ public class ReactionServiceImpl implements ReactionService {
 
     @Override
     public void setRating(List<Event> events) {
-        Map<ReactionId, ReactionType> reactionMap = reactionRepository.findAllById_EventIn(events)
+        Map<ReactionId, ReactionType> reactionMap = reactionRepository.findAllByIdEventIn(events)
                 .stream()
                 .collect(Collectors.toMap(Reaction::getId, Reaction::getReaction));
         events.forEach(event -> {

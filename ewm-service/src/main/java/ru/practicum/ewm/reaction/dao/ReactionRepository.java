@@ -10,5 +10,5 @@ import java.util.List;
 
 @Repository
 public interface ReactionRepository extends JpaRepository<Reaction, ReactionId> {
-    List<Reaction> findAllById_EventIn(List<Event> events);
+    List<Reaction> findAllByIdEventIn(List<Event> events);
 }
