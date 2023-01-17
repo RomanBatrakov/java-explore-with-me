@@ -69,9 +69,19 @@ CREATE TABLE IF NOT EXISTS requests
 
 CREATE TABLE IF NOT EXISTS events_compilation
 (
-    compilation_id BIGINT  NOT NULL
+    compilation_id BIGINT NOT NULL
         REFERENCES compilations ON DELETE CASCADE,
-    event_id       INTEGER NOT NULL
+    event_id       BIGINT NOT NULL
         REFERENCES events ON DELETE CASCADE,
     PRIMARY KEY (compilation_id, event_id)
+);
+
+CREATE TABLE IF NOT EXISTS reactions
+(
+    reaction VARCHAR(10) NOT NULL,
+    user_id  BIGINT      NOT NULL
+        REFERENCES users ON DELETE CASCADE,
+    event_id BIGINT      NOT NULL
+        REFERENCES events ON DELETE CASCADE,
+    PRIMARY KEY (user_id, event_id)
 );

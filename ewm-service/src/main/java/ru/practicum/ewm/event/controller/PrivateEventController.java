@@ -10,6 +10,7 @@ import ru.practicum.ewm.event.dto.EventShortDto;
 import ru.practicum.ewm.event.dto.NewEventDto;
 import ru.practicum.ewm.event.dto.UpdateEventDto;
 import ru.practicum.ewm.event.service.EventService;
+import ru.practicum.ewm.reaction.dto.ReactionDto;
 import ru.practicum.ewm.request.dto.RequestDto;
 import ru.practicum.ewm.request.model.RequestStatus;
 import ru.practicum.ewm.request.service.RequestService;
@@ -95,5 +96,22 @@ public class PrivateEventController {
                 " eventId={}, reqId={}", userId, eventId, requestId);
         return requestService
                 .changeRequestStatus(userId, eventId, requestId, RequestStatus.REJECTED);
+    }
+
+    @PostMapping("/{eventId}/reaction/{reaction}")
+    public ReactionDto createReaction(@PathVariable(USER_ID_PATH_VARIABLE_KEY) Long userId,
+                                      @PathVariable(EVENT_ID_PATH_VARIABLE_KEY) Long eventId,
+                                      @PathVariable(name = "reaction") String reaction) {
+        log.info("POST request for path /users/{userId}/events/{eventId}/reaction/{reaction} with userId={}," +
+                " eventId={}, reaction={}", userId, eventId, reaction);
+        return eventService.createReaction(userId, eventId, reaction);
+    }
+
+    @DeleteMapping("/{eventId}/reaction")
+    public void deleteReaction(@PathVariable(USER_ID_PATH_VARIABLE_KEY) Long userId,
+                               @PathVariable(EVENT_ID_PATH_VARIABLE_KEY) Long eventId) {
+        log.info("DELETE request for path /users/{userId}/events/{eventId}/reaction with userId={}, eventId={}", userId,
+                eventId);
+        eventService.deleteReaction(userId, eventId);
     }
 }

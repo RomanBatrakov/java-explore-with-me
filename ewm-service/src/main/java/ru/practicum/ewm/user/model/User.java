@@ -19,4 +19,6 @@ public class User {
     private String name;
     @Column(name = "email", unique = true)
     private String email;
+    @Transient
+    private Double rating;
 }

@@ -4,6 +4,7 @@ import lombok.*;
 import ru.practicum.ewm.category.model.Category;
 import ru.practicum.ewm.compilation.model.Compilation;
 import ru.practicum.ewm.location.model.Location;
+import ru.practicum.ewm.rating.model.Rating;
 import ru.practicum.ewm.user.model.User;
 
 import javax.persistence.*;
@@ -54,6 +55,8 @@ public class Event {
     private String title;
     @Transient
     private Long views;
+    @Transient
+    private Rating rating;
     @ManyToMany(mappedBy = "events")
     private List<Compilation> compilations;
 }

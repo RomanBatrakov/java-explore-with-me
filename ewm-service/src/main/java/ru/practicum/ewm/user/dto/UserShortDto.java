@@ -2,9 +2,6 @@ package ru.practicum.ewm.user.dto;
 
 import lombok.*;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
-
 @Getter
 @Setter
 @Builder
@@ -12,7 +9,5 @@ import javax.validation.constraints.Size;
 @NoArgsConstructor
 public class UserShortDto {
     private Long id;
-    @NotBlank(message = " is blank or null")
-    @Size(max = 50, message = " is to long")
     private String name;
 }

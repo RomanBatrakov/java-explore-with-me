@@ -18,6 +18,10 @@ import ru.practicum.ewm.exeption.ValidationException;
 import ru.practicum.ewm.hit.client.HitClient;
 import ru.practicum.ewm.hit.model.Hit;
 import ru.practicum.ewm.hit.model.Stats;
+import ru.practicum.ewm.rating.model.Rating;
+import ru.practicum.ewm.reaction.dto.ReactionDto;
+import ru.practicum.ewm.reaction.model.ReactionType;
+import ru.practicum.ewm.reaction.service.ReactionService;
 import ru.practicum.ewm.request.service.RequestService;
 import ru.practicum.ewm.user.mapper.UserMapper;
 import ru.practicum.ewm.user.model.User;
@@ -32,6 +36,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static ru.practicum.ewm.event.model.State.PUBLISHED;
 import static ru.practicum.ewm.util.QPredicates.createAdminPredicate;
 import static ru.practicum.ewm.util.QPredicates.createPublicPredicate;
 
@@ -48,11 +53,13 @@ public class EventServiceImpl implements EventService {
     private final RequestService requestService;
     private final CategoryService categoryService;
     private final CategoryMapper categoryMapper;
+    private final ReactionService reactionService;
     private final HitClient hitClient;
 
     public EventServiceImpl(EventRepository eventRepository, EventMapper eventMapper, UserMapper userMapper,
-                            UserService userService, @Lazy RequestService requestService,
-                            @Lazy CategoryService categoryService, CategoryMapper categoryMapper, HitClient hitClient) {
+                            @Lazy UserService userService, @Lazy RequestService requestService,
+                            @Lazy CategoryService categoryService, CategoryMapper categoryMapper,
+                            ReactionService reactionService, HitClient hitClient) {
         this.eventRepository = eventRepository;
         this.eventMapper = eventMapper;
         this.userMapper = userMapper;
@@ -60,23 +67,30 @@ public class EventServiceImpl implements EventService {
         this.requestService = requestService;
         this.categoryService = categoryService;
         this.categoryMapper = categoryMapper;
+        this.reactionService = reactionService;
         this.hitClient = hitClient;
     }
 
     @Override
     public List<EventShortDto> getAllPublicEvents(String text, Long[] categories, Boolean paid,
                                                   LocalDateTime rangeStart, LocalDateTime rangeEnd,
-                                                  Boolean onlyAvailable, String sort, Pageable pageable,
-                                                  HttpServletRequest request) {
+                                                  Boolean onlyAvailable, Boolean popular, String sort,
+                                                  Pageable pageable, HttpServletRequest request) {
         log.info("Getting all public events with filters");
         Predicate predicate = createPublicPredicate(text, categories, paid, rangeStart, rangeEnd);
         List<Event> events = (predicate == null) ? eventRepository.findAll(pageable).getContent()
                 : eventRepository.findAll(predicate, pageable).getContent();
         requestService.setConfirmedRequestsFromDb(events);
+        reactionService.setRating(events);
         if (onlyAvailable) {
             events = events.stream()
                     .filter(e -> (e.getParticipantLimit() != 0L)
                             && (e.getParticipantLimit() > e.getConfirmedRequests()))
+                    .collect(Collectors.toList());
+        }
+        if (popular) {
+            events = events.stream()
+                    .sorted(Comparator.comparing(e -> e.getRating().getRating(), Comparator.reverseOrder()))
                     .collect(Collectors.toList());
         }
         postHitToStatsServer(request);
@@ -88,8 +102,9 @@ public class EventServiceImpl implements EventService {
     public EventDto getPublicEventById(Long eventId, HttpServletRequest request) {
         try {
             log.info("Getting public event by id={}", eventId);
-            Event event = eventRepository.findEventByIdAndState(eventId, State.PUBLISHED);
+            Event event = eventRepository.findEventByIdAndState(eventId, PUBLISHED);
             requestService.setConfirmedRequestsFromDb(Collections.singletonList(event));
+            reactionService.setRating(Collections.singletonList(event));
             addViewsToEvents(Collections.singletonList(event));
             postHitToStatsServer(request);
             return eventMapper.toEventDto(event);
@@ -104,6 +119,7 @@ public class EventServiceImpl implements EventService {
             log.info("Getting event by id={}", eventId);
             Event event = eventRepository.findById(eventId).get();
             requestService.setConfirmedRequestsFromDb(Collections.singletonList(event));
+            reactionService.setRating(Collections.singletonList(event));
             addViewsToEvents(Collections.singletonList(event));
             return eventMapper.toEventDto(event);
         } catch (NoSuchElementException e) {
@@ -116,6 +132,7 @@ public class EventServiceImpl implements EventService {
         log.info("Converting events ids: {} to events", events);
         List<Event> eventList = eventRepository.findEventsByIdIn(events);
         requestService.setConfirmedRequestsFromDb(eventList);
+        reactionService.setRating(eventList);
         addViewsToEvents(eventList);
         return eventList;
     }
@@ -129,6 +146,7 @@ public class EventServiceImpl implements EventService {
         List<Event> events = (predicate == null) ? eventRepository.findAll(pageable).getContent()
                 : eventRepository.findAll(predicate, pageable).getContent();
         requestService.setConfirmedRequestsFromDb(events);
+        reactionService.setRating(events);
         addViewsToEvents(events);
         return eventMapper.toEventDtoList(events);
     }
@@ -152,7 +170,7 @@ public class EventServiceImpl implements EventService {
         Event event = eventMapper.toEvent(getEventById(eventId));
         if (event.getEventDate().isAfter(LOCAL_DATE_TIME_NOW.plusHours(1))
                 && event.getState().equals(State.PENDING)) {
-            event.setState(State.PUBLISHED);
+            event.setState(PUBLISHED);
             event.setPublishedOn(LOCAL_DATE_TIME_NOW);
             return eventMapper.toEventDto(eventRepository.save(event));
         } else {
@@ -164,7 +182,7 @@ public class EventServiceImpl implements EventService {
     public EventDto rejectEvent(Long eventId) {
         log.info("Canceling event by admin, eventId={}", eventId);
         Event event = eventMapper.toEvent(getEventById(eventId));
-        if (!event.getState().equals(State.PUBLISHED)) {
+        if (!event.getState().equals(PUBLISHED)) {
             event.setState(State.CANCELED);
             return eventMapper.toEventDto(eventRepository.save(event));
         } else {
@@ -174,12 +192,20 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<EventShortDto> getEventsByUser(Long userId, Pageable pageable) {
+        log.info("Getting events by userId={}", userId);
+        List<Event> eventList = getEventListByUser(userId, pageable);
+        return eventMapper.toEventShortDtoList(eventList);
+    }
+
+    @Override
+    public List<Event> getEventListByUser(Long userId, Pageable pageable) {
         try {
-            log.info("Getting events by userId={}", userId);
+            log.info("Getting eventList by userId={}", userId);
             List<Event> eventList = eventRepository.findEventsByInitiator_Id(userId, pageable);
             requestService.setConfirmedRequestsFromDb(eventList);
+            reactionService.setRating(eventList);
             addViewsToEvents(eventList);
-            return eventMapper.toEventShortDtoList(eventList);
+            return eventList;
         } catch (NoSuchElementException e) {
             return new ArrayList<>();
         }
@@ -192,7 +218,7 @@ public class EventServiceImpl implements EventService {
         Long catId = updateEventDto.getCategory();
         try {
             Event event = eventRepository.findEventByIdAndInitiator_Id(eventId, userId);
-            if (event.getState().equals(State.PUBLISHED)
+            if (event.getState().equals(PUBLISHED)
                     || event.getEventDate().isBefore(LOCAL_DATE_TIME_NOW.plusHours(2)))
                 throw new ValidationException("Wrong state or eventDate");
             if (event.getState().equals(State.CANCELED)) event.setState(State.PENDING);
@@ -202,6 +228,7 @@ public class EventServiceImpl implements EventService {
                 updatedEvent.setCategory(category);
             }
             requestService.setConfirmedRequestsFromDb(Collections.singletonList(updatedEvent));
+            reactionService.setRating(Collections.singletonList(updatedEvent));
             addViewsToEvents(Collections.singletonList(updatedEvent));
             return eventMapper.toEventDto(eventRepository.save(updatedEvent));
         } catch (NoSuchElementException e) {
@@ -223,6 +250,7 @@ public class EventServiceImpl implements EventService {
         event.setConfirmedRequests(0L);
         event.setViews(0L);
         event.setState(State.PENDING);
+        event.setRating(Rating.builder().build());
         return eventMapper.toEventDto(eventRepository.save(event));
     }
 
@@ -232,6 +260,7 @@ public class EventServiceImpl implements EventService {
             log.info("Getting user event by eventId={}, userId={}", eventId, userId);
             Event event = eventRepository.findEventByIdAndInitiator_Id(eventId, userId);
             requestService.setConfirmedRequestsFromDb(Collections.singletonList(event));
+            reactionService.setRating(Collections.singletonList(event));
             addViewsToEvents(Collections.singletonList(event));
             return eventMapper.toEventDto(event);
         } catch (NoSuchElementException e) {
@@ -247,6 +276,7 @@ public class EventServiceImpl implements EventService {
             if (event.getState().equals(State.PENDING)) {
                 event.setState(State.CANCELED);
                 requestService.setConfirmedRequestsFromDb(Collections.singletonList(event));
+                reactionService.setRating(Collections.singletonList(event));
                 addViewsToEvents(Collections.singletonList(event));
                 return eventMapper.toEventDto(eventRepository.save(event));
             } else {
@@ -277,6 +307,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public void addViewsToEvents(List<Event> events) {
+        log.info("Adding views to events={}", events);
         List<String> eventsUrl = events.stream()
                 .map(Event::getId)
                 .map(id -> URLEncoder.encode("/events/" + id, StandardCharsets.UTF_8))
@@ -291,5 +322,37 @@ public class EventServiceImpl implements EventService {
     @Override
     public Boolean existsByCategoryId(Long id) {
         return eventRepository.existsEventsByCategory_Id(id);
+    }
+
+    @Override
+    public ReactionDto createReaction(Long userId, Long eventId, String reaction) {
+        log.info("Creating reaction={}", reaction);
+        ReactionType reactionType = ReactionType.from(reaction)
+                .orElseThrow(() -> new ValidationException("Unknown reaction: " + reaction));
+        Event event = findPublishedEventById(eventId);
+        User user = userMapper.toUser(userService.getUserById(userId));
+        if (!event.getInitiator().equals(user) && requestService.validateUserParticipation(userId, eventId)) {
+            return reactionService.createReaction(user, event, reactionType);
+        } else {
+            throw new ValidationException(String.format("User %s is not a event %s participant", userId, eventId));
+        }
+    }
+
+    @Override
+    public void deleteReaction(Long userId, Long eventId) {
+        log.info("Deleting reaction with userId={}, eventId={}", userId, eventId);
+        Event event = findPublishedEventById(eventId);
+        User user = userMapper.toUser(userService.getUserById(userId));
+        reactionService.deleteById(user, event);
+    }
+
+    @Override
+    public Event findPublishedEventById(Long eventId) {
+        try {
+            log.info("Finding event={}", eventId);
+            return eventRepository.findEventByIdAndState(eventId, PUBLISHED);
+        } catch (NoSuchElementException e) {
+            throw new NoSuchElementException(String.format("Event with id %s is not found", eventId));
+        }
     }
 }

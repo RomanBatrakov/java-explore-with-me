@@ -19,4 +19,6 @@ public class UserDto {
     @NotBlank(message = " is blank or null")
     @Email(message = " is incorrect")
     private String email;
+    @Builder.Default
+    private Double rating = 0.0;
 }

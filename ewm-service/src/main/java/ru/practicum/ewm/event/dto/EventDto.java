@@ -6,6 +6,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import ru.practicum.ewm.category.dto.CategoryDto;
 import ru.practicum.ewm.event.model.State;
 import ru.practicum.ewm.location.dto.LocationDto;
+import ru.practicum.ewm.rating.dto.RatingDto;
 import ru.practicum.ewm.user.dto.UserShortDto;
 
 import java.time.LocalDateTime;
@@ -38,4 +39,5 @@ public class EventDto {
     private State state;
     private String title;
     private Long views;
+    private RatingDto rating;
 }

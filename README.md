@@ -74,7 +74,7 @@ __The _Ratings_ feature is included in the ewm-service__
 - [Stats-server](postman/ewm-stat-service.json)
 
 ## Architecture schema of the project:
-![Architecture schema](https://github)
+![Architecture schema](images/Architecture%20schema.PNG)
 
 ## Database description:
-![ER diagram](https://github.com/RomanBatrakov/java-filmorat)
+![ER diagram](images/ER%20diagram.png)

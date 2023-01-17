@@ -12,9 +12,11 @@ import java.util.List;
 public interface RequestRepository extends JpaRepository<Request, Long> {
     List<Request> findAllByRequesterId(Long userId);
 
-    List<Request> findAllByEvent_Id(Long eventId);
+    List<Request> findAllByEventId(Long eventId);
 
-    List<Request> findAllByEvent_IdAndStatus(Long eventId, RequestStatus status);
+    List<Request> findAllByEventIdAndStatus(Long eventId, RequestStatus status);
+
+    boolean existsByRequesterIdAndEventIdAndStatus(Long userId, Long eventId, RequestStatus status);
 
     List<Request> findAllByEventInAndStatus(List<Event> events, RequestStatus status);
 }
