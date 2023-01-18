@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.1",
   "info": {
-    "title": "Stat service API",
+    "title": "Stats server API",
     "version": "v0"
   },
   "servers": [
@@ -30,7 +30,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/EndpointHit"
+                "$ref": "#/components/schemas/HitDto"
               }
             }
           },
@@ -100,7 +100,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/ViewStats"
+                    "$ref": "#/components/schemas/Stats"
                   }
                 }
               }
@@ -112,7 +112,7 @@
   },
   "components": {
     "schemas": {
-      "EndpointHit": {
+      "HitDto": {
         "type": "object",
         "properties": {
           "id": {
@@ -139,7 +139,7 @@
           }
         }
       },
-      "ViewStats": {
+      "Stats": {
         "type": "object",
         "properties": {
           "app": {

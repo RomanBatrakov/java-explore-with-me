@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.1",
   "info": {
-    "title": "Main service API",
+    "title": "EWM service API",
     "version": "1.0"
   },
   "servers": [
@@ -156,7 +156,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NewCategoryDto"
+                "$ref": "#/components/schemas/CategoryDto"
               }
             }
           },
@@ -1021,7 +1021,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/EventFullDto"
+                    "$ref": "#/components/schemas/EventDto"
                   }
                 }
               }
@@ -1123,7 +1123,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/AdminUpdateEventRequest"
+                "$ref": "#/components/schemas/AdminUpdateEventDto"
               }
             }
           },
@@ -1135,7 +1135,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EventFullDto"
+                  "$ref": "#/components/schemas/EventDto"
                 }
               }
             },
@@ -1237,7 +1237,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EventFullDto"
+                  "$ref": "#/components/schemas/EventDto"
                 }
               }
             },
@@ -1339,7 +1339,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EventFullDto"
+                  "$ref": "#/components/schemas/EventDto"
                 }
               }
             },
@@ -1555,7 +1555,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NewUserRequest"
+                "$ref": "#/components/schemas/UserDto"
               }
             }
           },
@@ -2263,6 +2263,16 @@
             }
           },
           {
+            "description": "Сортировка по рейтингу событий",
+            "in": "query",
+            "name": "popular",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
             "description": "количество событий, которые нужно пропустить для формирования текущего набора",
             "in": "query",
             "name": "from",
@@ -2395,7 +2405,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EventFullDto"
+                  "$ref": "#/components/schemas/EventDto"
                 }
               }
             },
@@ -2620,7 +2630,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateEventRequest"
+                "$ref": "#/components/schemas/UpdateEventDto"
               }
             }
           },
@@ -2632,7 +2642,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EventFullDto"
+                  "$ref": "#/components/schemas/EventDto"
                 }
               }
             },
@@ -2743,7 +2753,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EventFullDto"
+                  "$ref": "#/components/schemas/EventDto"
                 }
               }
             },
@@ -2854,7 +2864,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EventFullDto"
+                  "$ref": "#/components/schemas/EventDto"
                 }
               }
             },
@@ -2964,7 +2974,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EventFullDto"
+                  "$ref": "#/components/schemas/EventDto"
                 }
               }
             },
@@ -3077,7 +3087,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/ParticipationRequestDto"
+                    "$ref": "#/components/schemas/RequestDto"
                   }
                 }
               }
@@ -3200,7 +3210,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ParticipationRequestDto"
+                  "$ref": "#/components/schemas/RequestDto"
                 }
               }
             },
@@ -3321,7 +3331,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ParticipationRequestDto"
+                  "$ref": "#/components/schemas/RequestDto"
                 }
               }
             },
@@ -3402,6 +3412,241 @@
         ]
       }
     },
+    "/users/{userId}/events/{eventId}/reaction/{reaction}": {
+"post": {
+        "description": "Обратите внимание:\n- событие должно быть опубликовано\n- участие пользователя в событии должно быть подтверждено \n- организатор события не может оценивать его",
+        "operationId": "addReaction",
+        "parameters": [
+          {
+            "description": "id текущего пользователя",
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "description": "id текущего события",
+            "in": "path",
+            "name": "eventId",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "description": "реакция пользователя",
+            "in": "path",
+            "name": "reaction",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "LIKE",
+                "DISLIKE"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReactionDto"
+                }
+              }
+            },
+            "description": "Реакция добавлена"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Запрос составлен с ошибкой"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Не выполнены условия для совершения операции"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": "NOT_FOUND",
+                  "reason": "The required object was not found.",
+                  "message": "Event with id=21 was not found.",
+                  "timestamp": "2022-09-07 09:10:50"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Объект не найден"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": "CONFLICT",
+                  "reason": "Integrity constraint has been violated",
+                  "message": "could not execute statement; SQL [n/a]; constraint [uq_category_name]; nested exception is org.hibernate.exception.ConstraintViolationException: could not execute statement",
+                  "timestamp": "2022-09-07 10:47:58"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Запрос приводит к нарушению целостности данных"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": "INTERNAL_SERVER_ERROR",
+                  "reason": "Error occurred",
+                  "message": "could not execute statement; SQL [n/a]; constraint [uq_category_name]; nested exception is org.hibernate.exception.ConstraintViolationException: could not execute statement",
+                  "timestamp": "2022-09-07 10:23:27"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Внутренняя ошибка сервера"
+          }
+        },
+        "summary": "Добавление новой реакции",
+        "tags": [
+          "Private: События"
+        ]
+      }
+    },
+"/users/{userId}/events/{eventId}/reaction": {
+      "delete": {
+        "operationId": "deleteReaction",
+        "parameters": [
+          {
+            "description": "id текущего пользователя",
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "description": "id текущего события",
+            "in": "path",
+            "name": "eventId",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Реакция удалена"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Запрос составлен с ошибкой"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Не выполнены условия для совершения операции"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": "NOT_FOUND",
+                  "reason": "The required object was not found.",
+                  "message": "Event with id=21 was not found.",
+                  "timestamp": "2022-09-07 09:10:50"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Объект не найден"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": "CONFLICT",
+                  "reason": "Integrity constraint has been violated",
+                  "message": "could not execute statement; SQL [n/a]; constraint [uq_category_name]; nested exception is org.hibernate.exception.ConstraintViolationException: could not execute statement",
+                  "timestamp": "2022-09-07 10:47:58"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Запрос приводит к нарушению целостности данных"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": "INTERNAL_SERVER_ERROR",
+                  "reason": "Error occurred",
+                  "message": "could not execute statement; SQL [n/a]; constraint [uq_category_name]; nested exception is org.hibernate.exception.ConstraintViolationException: could not execute statement",
+                  "timestamp": "2022-09-07 10:23:27"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Внутренняя ошибка сервера"
+          }
+        },
+        "summary": "Удаление реакции",
+        "tags": [
+          "Private: События"
+        ]
+      }
+    },
+
+
+
+
+
+
     "/users/{userId}/requests": {
       "get": {
         "operationId": "getUserRequests",
@@ -3424,7 +3669,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/ParticipationRequestDto"
+                    "$ref": "#/components/schemas/RequestDto"
                   }
                 }
               }
@@ -3535,7 +3780,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ParticipationRequestDto"
+                  "$ref": "#/components/schemas/RequestDto"
                 }
               }
             },
@@ -3646,7 +3891,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ParticipationRequestDto"
+                  "$ref": "#/components/schemas/RequestDto"
                 }
               }
             },
@@ -3730,7 +3975,7 @@
   },
   "components": {
     "schemas": {
-      "AdminUpdateEventRequest": {
+      "AdminUpdateEventDto": {
         "type": "object",
         "properties": {
           "annotation": {
@@ -3978,7 +4223,7 @@
         },
         "description": "Подборка событий"
       },
-      "EventFullDto": {
+      "EventDto": {
         "required": [
           "annotation",
           "category",
@@ -4074,6 +4319,9 @@
             "description": "Количество просмотрев события",
             "format": "int64",
             "example": 999
+          },
+          "rating": {
+            "$ref": "#/components/schemas/RatingDto"
           }
         }
       },
@@ -4131,7 +4379,13 @@
             "description": "Количество просмотрев события",
             "format": "int64",
             "example": 999
-          }
+          },
+          "rating": {
+            "type": "number",
+            "description": "Рейтинг события",
+            "format": "double",
+            "example": 5.5
+            }
         },
         "description": "Краткая информация о событии",
         "example": [
@@ -4150,7 +4404,8 @@
             },
             "paid": true,
             "title": "Знаменитое шоу 'Летающая кукуруза'",
-            "views": 999
+            "views": 999,
+            "rating": 7.3
           },
           {
             "annotation": "За почти три десятилетия группа 'Java Core' закрепились на сцене как группа, объединяющая поколения.",
@@ -4167,7 +4422,8 @@
             },
             "paid": true,
             "title": "Концерт рок-группы 'Java Core'",
-            "views": 991
+            "views": 991,
+            "rating": 5.5
           }
         ]
       },
@@ -4188,20 +4444,6 @@
           }
         },
         "description": "Широта и долгота места проведения события"
-      },
-      "NewCategoryDto": {
-        "required": [
-          "name"
-        ],
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "Название категории",
-            "example": "Концерты"
-          }
-        },
-        "description": "Данные для добавления новой категории"
       },
       "NewCompilationDto": {
         "required": [
@@ -4306,27 +4548,7 @@
         },
         "description": "Новое событие"
       },
-      "NewUserRequest": {
-        "required": [
-          "email",
-          "name"
-        ],
-        "type": "object",
-        "properties": {
-          "email": {
-            "type": "string",
-            "description": "Почтовый адрес",
-            "example": "ivan.petrov@practicummail.ru"
-          },
-          "name": {
-            "type": "string",
-            "description": "Имя",
-            "example": "Иван Петров"
-          }
-        },
-        "description": "Данные нового пользователя"
-      },
-      "ParticipationRequestDto": {
+      "RequestDto": {
         "type": "object",
         "properties": {
           "created": {
@@ -4360,7 +4582,7 @@
         },
         "description": "Заявка на участие в событии"
       },
-      "UpdateEventRequest": {
+      "UpdateEventDto": {
         "required": [
           "eventId"
         ],
@@ -4441,7 +4663,13 @@
             "type": "string",
             "description": "Имя",
             "example": "Петров Иван"
-          }
+          },
+          "rating": {
+            "type": "number",
+            "description": "Рейтинг пользователя",
+            "format": "double",
+            "example": 5.5
+            }
         },
         "description": "Пользователь"
       },
@@ -4465,6 +4693,57 @@
           }
         },
         "description": "Пользователь (краткая информация)"
+      },
+      "ReactionDto": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "description": "Идентификатор пользователя",
+            "format": "int64",
+            "example": 3
+          },
+          "eventId": {
+            "type": "integer",
+            "description": "Идентификатор события",
+            "format": "int64",
+            "example": 3
+          },
+          "reaction": {
+            "type": "string",
+            "description": "Реакция пользователя на событие",
+            "example": "LIKE",
+            "enum": [
+              "LIKE",
+              "DISLIKE"
+            ]
+          }
+        },
+        "description": "Реакция"
+      },
+      "RatingDto": {
+        "type": "object",
+        "properties": {
+          "likes": {
+            "type": "integer",
+            "description": "Количество лайков события",
+            "format": "int64",
+            "example": 3
+          },
+          "dislikes": {
+            "type": "integer",
+            "description": "Количество дизлайков события",
+            "format": "int64",
+            "example": 3
+          },
+          "rating": {
+            "type": "number",
+            "description": "Рейтинг события",
+            "format": "double",
+            "example": 5.5
+            }
+        },
+        "description": "Рейтинг"
       }
     }
   }
